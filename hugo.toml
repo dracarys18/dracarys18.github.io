@@ -1,0 +1,18 @@
+baseURL = 'https://karthihegde.dev'
+languageCode = 'en-us'
+title = "Karthikey's Portfolio"
+theme='lynx'
+enableEmoji = true
+disableKinds = ["taxonomy", "term"]
+
+[params.author]
+  name = "Karthikey Hegde"
+  headline = "The curious one"
+  image = "prof.jpeg"  # path relative to static directory
+
+  links = [
+    { email = "mailto:me@karthihegde.dev" },
+    { github = "https://github.com/dracarys18" },
+    { linkedin = "https://linkedin.com/in/karthihegde010" },
+    { spotify = "https://spotify.com/user/dracarys18" },
+  ]
