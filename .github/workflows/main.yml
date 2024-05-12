@@ -25,7 +25,7 @@ jobs:
 
       - name: Build
         working-directory: ./
-        run: hugo --minify --themesDir ./themes --baseURL https://karthihegde.dev
+        run: hugo --minify --themesDir ./themes --baseURL https://www.karthihegde.dev
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
