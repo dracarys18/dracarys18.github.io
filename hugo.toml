@@ -15,5 +15,5 @@ disableKinds = ["taxonomy", "term"]
     { github = "https://github.com/dracarys18" },
     { linkedin = "https://linkedin.com/in/karthihegde010" },
     { spotify = "https://open.spotify.com/user/kirikkarthi" },
-    { x = "https://x.com/karthihegde" },
+    { twitter = "https://twitter.com/karthihegde" },
   ]
