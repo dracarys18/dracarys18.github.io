@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karthikey Hegde</title>
+    <link rel="stylesheet" href = "../styles.css">
+</head>
+<body>
+    <div class="header">
+        <nav>
+            <a href="/" class="nav-link">/ karthihegde</a>
+            <a href="../contact.html" class="nav-link">/ contact</a>
+            <a href="../posts.html" class="nav-link">/ posts</a>
+        </nav>
+    </div>
+    <div class = "blog_title">From Paperweight to Homelab</div>
+    <p> As I was going through my daily routine, I received that dreaded Google Photos notification: 'Your storage is 70% full. Upgrade your plan for more storage.' The frustration set in immediately—I had just upgraded my plan a week ago! While pondering how I'd already consumed so much space, my gaze drifted to my old laptop gathering dust on the shelf, with its unused 2TB SSD and substantial computing power sitting idle. In that moment, the idea of self-hosting clicked into place like the final piece of a puzzle.</p>
+    <figure class="image-container">
+        <img src="./assets/vito.png" alt="Self-hosting illustration" class="blog-image">
+        <figcaption class="image-quote">My old laptop with Vito Corleone</figcaption>
+    </figure>
+    <p> Well, whenever I have a problem it's my habit to scour through Reddit for solutions. There I stumbled upon <a href = "https://www.reddit.com/r/selfhosted"><u>r/selfhosted</u></a>. There I found my messiah "Immich". Immich is a self hosted alternative for Google Photos with almost identical features. Immich seemed perfect! Now came the real question that would launch my homelab journey: where do I start?</p>
+    <p> While I'd been treating my laptop like a relic, this was not really Intel pentium running dinosaur. This was pretty capable for a homelab.
+    <ul>
+        <li>Intel i5-8250U</li>
+        <li>12 GB RAM</li>
+        <li>NVIDIA GeForce MX150 </li>
+    </ul>
+    </p>
+    <p> Like any cultured individual I had USB with Arch Linux ready, So I took my laptop and wiped windows and installed Arch linux</p>
+    <p> Now my idea was that I would run immich through docker and expose the port on my router and voila! I have my homelab ready! Well, things weren't that simple let's say.</p>
+    <p> Well you see, To address the limitations of IPv4 address exhaustion, ISPs often deploy Carrier-Grade NAT (CGNAT) on their networks. With CGNAT, users are assigned private IP addresses that are not directly accessible from the outside world, effectively sharing a smaller pool of public IP addresses among multiple customers.<br> One potential solution is to rent a publicly accessible static IP address.</p>
+    <p> Since my goal wasn't to expose traffic to a large number of users on the internet, but rather to connect just a few of my personal devices, a tunneling solution made more sense.</p>
+    <p> I had few options on the tunneling setup, I went with the one which was very easy to setup and manage which is <b> Tailscale</b>. Tailscale itself is based of wireguard, has amazing documentation and community which made it a perfect choice for me.</p>
+    <p> As of today (the date of this blog), I’m running a few self-hosted services on my old laptop. It's pretty amazing how a device I once considered obsolete has now become a central part of my digital ecosystem.</p>
+    <figure class="image-container">
+        <img src="./assets/glance.png" alt="Self-hosting illustration" class="blog-image">
+        <figcaption class="image-quote">Screenshot of my Glance dashboard</figcaption>
+    </figure>
+    <p>What started as frustration with Google Photos storage costs led me down the rabbit hole of self-hosting. I'm still at the surface, excited to see what lies deeper.</p>
+    <p> I'll leave some relevant links below for anyone interested in diving deeper into the topics discussed in this blog.</p>
+    <ul>
+        <li> Homelab configs: <a href = "https://github.com/dracarys18/homelab.git"><u>https://github.com/dracarys18/homelab.git</u></a> </li>
+        <li> CGNAT: <a href = "https://en.wikipedia.org/wiki/Carrier-grade_NAT"><u>https://en.wikipedia.org/wiki/Carrier-grade_NAT</u></a></li>
+        <li><a href = "https://datatracker.ietf.org/doc/html/rfc6264"> <u>Interesting RFC proposing CGNAT as a temporary solution before the world moves to IPv6 </u></a>
+    </ul>
+</body>

@@ -83,6 +83,35 @@ a:hover {
     font-weight: 800;
     margin-bottom: 20px;
 }
+
+
+.blog_title {
+    font-size: 30px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.blog-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px 0;
+}
+
+.image-container {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.image-quote {
+    font-style: italic;
+    margin-top: 10px;
+    color: #555;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .social-links {
     display: flex;
     gap: 15px;
@@ -143,6 +172,11 @@ a:hover {
 
     .social-links {
         justify-content: center;
+    }
+
+    .blog-image {
+        max-width: 80%;
+        margin: 30px auto;
     }
 }
 
