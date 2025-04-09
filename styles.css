@@ -132,6 +132,24 @@ a:hover {
     transition: background-color 0.2s;
 }
 
+.social-icon-calendar {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background-color: #111111;
+    border: 1px solid #333;
+    border-radius: 5px;
+    display: flex;
+    align: left;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.social-icon-calendar:hover {
+    background-color: #333;
+}
+
 .social-icon:hover {
     background-color: #333;
 }
