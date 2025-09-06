@@ -197,12 +197,17 @@ a:hover {
         max-width: 80%;
         margin: 30px auto;
     }
+    .blog-gif {
+        max-width: 90%;   /* slightly smaller on small screens */
+        margin: 20px auto; 
+    }
 }
 
 .blog-gif {
-  max-width: 80%;
+  max-width: 100%;       /* take full width of container */
+  height: auto;          /* maintain aspect ratio */
   display: block;
-  margin: 20px auto;
+  margin: 20px auto;     /* center horizontally with auto margins */
   border-radius: 8px;
 }
 
