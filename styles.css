@@ -91,11 +91,12 @@ a:hover {
     margin-bottom: 20px;
     text-align: center;
 }
+
 .blog-image {
+    display: block;
+    margin: 0 auto;
     max-width: 100%;
     height: auto;
-    display: block;
-    margin: 20px 0;
 }
 
 .image-container {
@@ -198,3 +199,69 @@ a:hover {
     }
 }
 
+.blog-gif {
+  max-width: 80%;
+  display: block;
+  margin: 20px auto;
+  border-radius: 8px;
+}
+
+/* Code block styling to match site theme */
+pre[class*="language-"] {
+    background: #111111;   /* match your blog’s background tone */
+    color: #eaeaea;        /* light text */
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    overflow-x: auto;
+    font-size: 14px;
+    line-height: 1.5;
+    font-family: "Fira Code", "Courier New", monospace;
+    margin: 20px 0;
+}
+
+/* Inline code styling */
+code[class*="language-"] {
+    background: #1a1a1a;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "Fira Code", "Courier New", monospace;
+    font-size: 14px;
+}
+
+/* Prism token colors tweaked to match dark theme */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: #6a9955;
+    font-style: italic;
+}
+
+.token.punctuation {
+    color: #cccccc;
+}
+
+.token.keyword {
+    color: #569cd6;
+}
+
+.token.string {
+    color: #ce9178;
+}
+
+.token.function {
+    color: #dcdcaa;
+}
+
+.token.number {
+    color: #b5cea8;
+}
+
+.token.operator {
+    color: #d4d4d4;
+}
+
+.token.boolean {
+    color: #569cd6;
+}
