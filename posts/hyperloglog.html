@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Karthikey Hegde</title>
+        <link rel="stylesheet" href="../styles.css" />
+
+        <!-- Prism.js for syntax highlighting -->
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+            rel="stylesheet"
+        />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    </head>
+    <!-- Google tag (gtag.js) -->
+    <script
+        async
+        src="https://www.googletagmanager.com/gtag/js?id=G-QMCKX3D5N7"
+    ></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag("js", new Date());
+
+        gtag("config", "G-QMCKX3D5N7");
+    </script>
+    <body>
+        <div class="header">
+            <nav>
+                <a href="/" class="nav-link">/ karthihegde</a>
+                <a href="../contact.html" class="nav-link">/ contact</a>
+                <a href="../posts.html" class="nav-link">/ posts</a>
+            </nav>
+        </div>
+        <div class="blog_title">
+            HyperLogLog: Accurately Inaccurate Counting
+        </div>
+        <p>
+        </p>
+
+        <p>
+        </p>
+
+        <h3 id="the-problem">## The Problem</h3>
+        <p>
+        </p>
+
+        <p>
+        </p>
+
+        <h3 id="intuition">## The Core Intuition</h3>
+        <p>
+        </p>
+
+        <p>
+        </p>
+
+        <p>
+            Now let's load the actual implementation compiled to WebAssembly.
+            This gives us the performance and correctness of native Zig code
+            running directly in the browser:
+        </p>
+
+        <h3 id="demo">## Interactive Prototype</h3>
+        <p>
+        </p>
+
+        <div
+            style="
+                background-color: #1a1a1a;
+                padding: 20px;
+                margin: 20px 0;
+                border-left: 4px solid #444;
+            "
+        >
+            <strong>HyperLogLog Counter</strong>
+            <br /><br />
+            <input
+                type="text"
+                id="hll-input"
+                placeholder="Add an item..."
+                style="
+                    background: #333;
+                    color: #fff;
+                    border: 1px solid #555;
+                    padding: 8px;
+                    margin: 10px 0;
+                    width: 200px;
+                "
+            />
+            <button
+                onclick="addToHLL()"
+                style="
+                    background: #444;
+                    color: #fff;
+                    border: 1px solid #666;
+                    padding: 8px 16px;
+                    margin-left: 10px;
+                "
+            >
+                Add Item
+            </button>
+            <button
+                onclick="addRandomItems()"
+                style="
+                    background: #444;
+                    color: #fff;
+                    border: 1px solid #666;
+                    padding: 8px 16px;
+                    margin-left: 10px;
+                "
+            >
+                Add 100 Random
+            </button>
+            <button
+                onclick="resetHLL()"
+                style="
+                    background: #444;
+                    color: #fff;
+                    border: 1px solid #666;
+                    padding: 8px 16px;
+                    margin-left: 10px;
+                "
+            >
+                Reset
+            </button>
+
+            <div id="hll-stats" style="margin-top: 15px">
+                <div>Actual unique items: <span id="actual-count">0</span></div>
+                <div>
+                    HyperLogLog estimate: <span id="hll-estimate">0</span>
+                </div>
+                <div>Error: <span id="error-rate">0%</span></div>
+                <div>
+                    Memory usage:
+                    <span id="memory-usage">64 bytes</span> (fixed)
+                </div>
+            </div>
+
+            <div style="margin-top: 15px">
+                <strong>Items added:</strong>
+                <div
+                    id="items-list"
+                    style="
+                        max-height: 100px;
+                        overflow-y: auto;
+                        background: #333;
+                        padding: 10px;
+                        margin: 10px 0;
+                        font-family: monospace;
+                        font-size: 12px;
+                    "
+                ></div>
+            </div>
+        </div>
+
+        <h3 id="accuracy">## Why It Works</h3>
+        <p>
+        </p>
+
+        <p>
+        </p>
+
+        <p>
+        </p>
+
+        <h3 id="real-world">## Real-World Applications</h3>
+        <p>
+        </p>
+
+        <h3 id="tradeoffs">## The Tradeoffs</h3>
+        <p>
+        </p>
+
+        <p>
+        </p>
+
+        <h3 id="takeaways">## Takeaways</h3>
+        <p>
+        </p>
+
+        <p>
+        </p>
+
+        <p>
+        </p>
+
+        <p>
+        </p>
+
+        <script>
+            // WASM module and tracking
+            let wasmModule = null;
+            let wasmMemory = null;
+            let actualItems = new Set();
+
+            // Load WASM module
+            async function loadWASM() {
+                try {
+                    const response = await fetch("wasm/wood.wasm");
+                    if (!response.ok) {
+                        throw new Error(
+                            `HTTP ${response.status}: ${response.statusText}`,
+                        );
+                    }
+
+                    const bytes = await response.arrayBuffer();
+                    const module = await WebAssembly.compile(bytes);
+
+                    wasmModule = await WebAssembly.instantiate(module, {
+                        env: {
+                            // Provide any required imports here
+                        },
+                    });
+
+                    // Initialize HyperLogLog with precision 4 (16 buckets)
+                    wasmModule.exports.hll_init(4);
+                } catch (error) {
+                    console.error("Failed to load WASM:", error);
+                }
+            }
+
+            // Write string to WASM memory
+            function writeStringToWasm(str) {
+                const encoder = new TextEncoder();
+                const bytes = encoder.encode(str);
+
+                if (!wasmMemory) {
+                    wasmMemory = wasmModule.exports.memory;
+                }
+
+                const ptr = 1000; // fixed offset (for demo only)
+                const view = new Uint8Array(wasmMemory.buffer);
+                view.set(bytes, ptr);
+
+                return { ptr, len: bytes.length };
+            }
+
+            function addToHLL() {
+                const input = document.getElementById("hll-input").value;
+                if (!input) return;
+
+                const { ptr, len } = writeStringToWasm(input);
+                wasmModule.exports.hll_add(ptr, len);
+
+                actualItems.add(input);
+                updateStats();
+                updateItemsList();
+
+                document.getElementById("hll-input").value = "";
+            }
+
+            function addRandomItems() {
+                for (let i = 0; i < 100; i++) {
+                    const randomItem = "item_" + Math.floor(Math.random() * 1000000);
+
+                    const { ptr, len } = writeStringToWasm(randomItem);
+                    wasmModule.exports.hll_add(ptr, len);
+
+                    actualItems.add(randomItem);
+                }
+                updateStats();
+                updateItemsList();
+            }
+
+            function resetHLL() {
+                wasmModule.exports.hll_reset();
+                actualItems.clear();
+                updateStats();
+                document.getElementById("items-list").innerHTML = "";
+            }
+
+            function updateStats() {
+                const actual = actualItems.size;
+                const estimate = Math.round(wasmModule.exports.hll_count());
+
+                const error =
+                    actual === 0
+                        ? 0
+                        : Math.abs(((estimate - actual) / actual) * 100);
+
+                document.getElementById("actual-count").textContent = actual;
+                document.getElementById("hll-estimate").textContent = estimate;
+                document.getElementById("error-rate").textContent =
+                    error.toFixed(1) + "%";
+            }
+
+            function updateItemsList() {
+                const items = Array.from(actualItems);
+                const display =
+                    items.length > 20
+                        ? items.slice(-20).join(", ") + "..."
+                        : items.join(", ");
+                document.getElementById("items-list").textContent = display;
+            }
+
+            // Initialize WASM on page load
+            window.addEventListener("load", loadWASM);
+        </script>
+
+        <style>
+            input,
+            button {
+                font-family: "Source Code Pro", monospace;
+            }
+
+            button:hover {
+                background-color: #555 !important;
+            }
+
+            #demo-output,
+            #hll-stats {
+                font-size: 14px;
+                line-height: 1.4;
+            }
+
+            #demo-output div,
+            #hll-stats div {
+                margin: 5px 0;
+            }
+
+            .blog_title {
+                font-size: 24px;
+                font-weight: bold;
+                margin: 30px 0;
+                border-bottom: 1px dashed #444;
+                padding-bottom: 10px;
+            }
+
+            h3 {
+                color: #fff;
+                margin: 30px 0 15px 0;
+                font-size: 18px;
+            }
+
+            ul li {
+                margin: 8px 0;
+            }
+
+            pre {
+                overflow-x: auto;
+                background-color: #1a1a1a;
+                border-left: 4px solid #444;
+                padding: 15px;
+                margin: 20px 0;
+            }
+
+            code {
+                font-family: "Source Code Pro", monospace;
+            }
+        </style>
+    </body>
+</html>
