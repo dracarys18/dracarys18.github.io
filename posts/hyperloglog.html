@@ -218,7 +218,7 @@
                     });
 
                     // Initialize HyperLogLog with precision 4 (16 buckets)
-                    wasmModule.exports.hll_init(4);
+                    wasmModule.exports.hll_init(16);
                 } catch (error) {
                     console.error("Failed to load WASM:", error);
                 }
