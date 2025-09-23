@@ -13,6 +13,15 @@
         />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+        <meta property="og:title" content="HyperLogLog: Counting without Counting" />
+        <meta property="og:description" content="Deep dive and implementation of Hyperloglog, a probabilistic counting algorithm" />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content="https://karthihegde.dev/posts/hyperloglog" />
+
+        <meta property="twitter:title" content="HyperLogLog: Counting without Counting" />
+        <meta property="twitter:description" content="Deep dive and implementation of Hyperloglog, a probabilistic counting algorithm" />
     </head>
     <!-- Google tag (gtag.js) -->
     <script
@@ -37,295 +46,188 @@
             </nav>
         </div>
         <div class="blog_title">
-            HyperLogLog: Accurately Inaccurate Counting
+            HyperLogLog: Counting without Counting
         </div>
         <p>
+         Every time I read about a probabilistic data structure, I’m blown away — like, who even came up with this stuff? (It's Philippe Flajolet a french scientist) Even after I understand how it works, it still feels magical, like it answered the question out of thin air.In this blog, I’ll explain how it works — with as few Greek letters as possible so you have your mind blown too :)
+        </p>
+        <p>
+          I've implemented the HyperLogLog algorithm in Zig. Check out the repository here:
+        </p>
+        <p>
+          <a href="https://github.com/dracarys18/wood" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             style="font-weight: bold; color: #1a73e8; text-decoration: none;">
+             https://github.com/dracarys18/wood
+          </a>
+        </p>
+
+        <h3 id="the-problem">## Counting Unique Elements</h3>
+        <p>
+        Counting unique elements is a memory heavy task, it requires you to remember all the elements that has ever been pushed to the set which could be very high. Hyperloglog on the other hand uses small constant amount of memory to get the unique count.
+        </p>
+        <p>
+        With just 16KB of memory it can count the cardinality of billions of items with error rate below 1%
+        </p>
+
+        <h3 id="intuition">## How does it work?</h3>
+        <p>
+            Imagine you have a byte. What are the chances that the first bit is zero? It’s 50%. What about the first two bits being zero? That’s 25%. In general, the probability that the first n bits are zero is 1/2ⁿ.
+        </p>
+        <p>
+            For example, the probability that the first 10 bits are all zero is 1/1024. This means that, on average, you would need 1,024 numbers to get one where the first 10 bits are zero.
         </p>
 
         <p>
-        </p>
-
-        <h3 id="the-problem">## The Problem</h3>
-        <p>
+            That’s the basic idea of HyperLogLog it estimates the number of unique number in the set by just using the first n leading zeroes of the hashed values
         </p>
 
         <p>
+            So why hash the bits why not just count the zeroes in raw bits? Hashing the value gives you randoml-looking distribution of bits without hashing, the raw input values might have patterns or clusters that bias the algorithm, making our estimates inaccurate.
         </p>
-
-        <h3 id="intuition">## The Core Intuition</h3>
         <p>
+            In a large set of numbers, there’s a high chance that some values will be unusual or extreme. To reduce the effect of these “freak” values, HyperLogLog divides the numbers into multiple buckets. The more buckets you have, the more accurate the estimate becomes. When initializing HyperLogLog, you provide a precision <code>p</code>, which determines the number of buckets as <code>2^p</code>.
         </p>
-
         <p>
+            After using the first <code>p</code> bits to pick a bucket, the remaining bits of the hash are used to count the number of leading zeros. This is the clever part that allows HyperLogLog to estimate the total number of unique items. 
         </p>
-
         <p>
-            Now let's load the actual implementation compiled to WebAssembly.
-            This gives us the performance and correctness of native Zig code
-            running directly in the browser:
+            Each bucket keeps track of the largest number of leading zeros it has seen. Later, HyperLogLog combines the information from all buckets to produce a single estimate. By using multiple buckets, the highs and lows from random chance balance out, giving a much more reliable result — all while using very little memory.
         </p>
-
-        <h3 id="demo">## Interactive Prototype</h3>
+        <h3 id="intuition">## Count(Main Part) </h3>
         <p>
+            Now that we understand there are <code>2^p</code> buckets and each bucket stores the largest number of leading zeros it has seen, it’s time to look at how HyperLogLog uses this information to estimate the total number of unique items.
         </p>
-
-        <div
-            style="
-                background-color: #1a1a1a;
-                padding: 20px;
-                margin: 20px 0;
-                border-left: 4px solid #444;
-            "
-        >
-            <strong>HyperLogLog Counter</strong>
-            <br /><br />
-            <input
-                type="text"
-                id="hll-input"
-                placeholder="Add an item..."
-                style="
-                    background: #333;
-                    color: #fff;
-                    border: 1px solid #555;
-                    padding: 8px;
-                    margin: 10px 0;
-                    width: 200px;
-                "
-            />
-            <button
-                onclick="addToHLL()"
-                style="
-                    background: #444;
-                    color: #fff;
-                    border: 1px solid #666;
-                    padding: 8px 16px;
-                    margin-left: 10px;
-                "
-            >
-                Add Item
-            </button>
-            <button
-                onclick="resetHLL()"
-                style="
-                    background: #444;
-                    color: #fff;
-                    border: 1px solid #666;
-                    padding: 8px 16px;
-                    margin-left: 10px;
-                "
-            >
-                Reset
-            </button>
-
-            <div id="hll-stats" style="margin-top: 15px">
-                <div>Actual unique items: <span id="actual-count">0</span></div>
-                <div>
-                    HyperLogLog estimate: <span id="hll-estimate">0</span>
-                </div>
-                <div>Error: <span id="error-rate">0%</span></div>
-                <div>
-                    Memory usage:
-                    <span id="memory-usage">64 bytes</span> (fixed)
-                </div>
-            </div>
-
-            <div style="margin-top: 15px">
-                <strong>Items added:</strong>
-                <div
-                    id="items-list"
-                    style="
-                        max-height: 100px;
-                        overflow-y: auto;
-                        background: #333;
-                        padding: 10px;
-                        margin: 10px 0;
-                        font-family: monospace;
-                        font-size: 12px;
-                    "
-                ></div>
-            </div>
-        </div>
-
-        <h3 id="accuracy">## Why It Works</h3>
         <p>
+            HyperLogLog combines the data from all buckets using a simple idea: if some buckets have very high leading-zero counts, it means the dataset is likely large. If most buckets have small counts, the dataset is smaller. By averaging these counts and applying a correction formula, HyperLogLog calculates an estimate of the number of unique elements. 
         </p>
-
         <p>
+            The formula might look complicated at first, but the intuition is straightforward: each bucket gives a hint about the size of the dataset, and combining all these hints produces a reliable estimate without ever storing all the items.
         </p>
-
         <p>
+        The HyperLogLog estimate is given by:
         </p>
-
-        <h3 id="real-world">## Real-World Applications</h3>
+        <p style="text-align:center;">
+            $$E = \alpha_m \cdot m^2 \cdot \left( \sum_{j=1}^{m} 2^{-M[j]} \right)^{-1}$$
+        </p>
+        <p>Where:</p>
+        <ul>
+          <li><code>E</code> = estimated number of unique items</li>
+          <li><code>m = 2^p</code> = number of buckets</li>
+          <li><code>M[j]</code> = largest number of leading zeros observed in bucket <code>j</code></li>
+          <li><code>α<sub>m</sub></code> = bias correction constant (depends on <code>m</code>)</li>
+        </ul>
+        <p>Woah, woah! I promised no Greek letters… I tried, but let me explain.</p>
         <p>
+            Let’s focus on the inner part of the formula:
         </p>
-
-        <h3 id="tradeoffs">## The Tradeoffs</h3>
+        <p style="text-align:center;">
+        $$m^2 \cdot ( \sum_{j=1}^{m} 2^{-M[j]})^{-1}$$
+        </p>
         <p>
+            In this formula, <code>j</code> is the bucket number, and <code>M[j]</code> is the maximum count of leading zeros seen in that bucket. As we saw before, <code>1/2<sup>M[j]</sup></code> roughly estimates how many items ended up in that bucket.
         </p>
-
         <p>
+            Up to this point, we’ve only looked at one bucket’s estimate. You might think we could just average all the buckets, but a single very large value can throw off the result. HyperLogLog avoids this by using the <strong>harmonic mean</strong>, which evens out the buckets and keeps the estimate more accurate. Thus the reciprocal on the sum on the formula multiplied by the bucket size.     The harmonic mean only tells us the average estimate for a single bucket. To estimate the total number of unique items across all buckets, we multiply it by the total number of buckets.
         </p>
-
-        <h3 id="takeaways">## Takeaways</h3>
         <p>
+            Now we have finished explaining the basic estimate, but this number can vary for very small or very large datasets:
         </p>
-
+        <ul>
+            <li><strong>Small range:</strong> When the dataset is small, many buckets are still zero. In this case, the formula tends to underestimate the number of unique items.</li>
+            <li><strong>Large range:</strong> When the dataset is very large, the formula can overestimate the count significantly.</li>
+        </ul>
         <p>
+            Now this is where the mysterious Greek letter comes in. It’s called the <strong>bias correction constant</strong>, and its job is to make the estimate slightly more accurate.
         </p>
-
+        <p> When Hyperloglog was initially developed the researchers went through a lot of data and checked the ratio between raw estimate and actual count and came up with the bias correction constant</p>
+        <p> Here's the formula for bias correction </p>
+        <ul>
+            <li>For <code>m = 16</code> → <code>α<sub>m</sub> = 0.673</code></li>
+            <li>For <code>m = 32</code> → <code>α<sub>m</sub> = 0.697</code></li>
+            <li>For <code>m = 64</code> → <code>α<sub>m</sub> = 0.709</code></li>
+            <li>For <code>m ≥ 128</code> → <code>α<sub>m</sub> = 0.7213 / (1 + 1.079 / m)</code></li>
+        </ul>
         <p>
+            So why does α<sub>m</sub> change based on the number of buckets? When the number of buckets is small, the estimate tends to have a slightly different bias than when the number of buckets is large. The constant α<sub>m</sub> adjusts for this difference to keep the estimate accurate.
         </p>
-
+        <h3 id="intuition">## Error Rate </h3>
+        <p> So after all these calculations, the formula for Hyperloglog standard error rate is </p>
+        <p style="text-align:center;">
+            $$\text{Standard Error} = \frac{1.04}{\sqrt{m}}$$
+        </p>
         <p>
+            The smaller the number of buckets, the higher the error will be. Each bucket stores a small number (the maximum number of leading zeros seen), so using fewer buckets means less memory is used but also less information is captured, which increases the error.
+        </p>
+        <h3 id="intuition">## Conclusion </h3>
+        <p>
+            Well, there you have it, a deep dive into probabilistic counting! When I first read the original HyperLogLog paper, it was full of math and symbols, and it took me a while to wrap my head around it. Here, I’ve tried to make it as simple and readable as possible. I hope you enjoyed it! I didn’t include all the code examples because the blog was already long enough, but you can always check out the implementation on my GitHub.
         </p>
 
-        <script>
-            // WASM module and tracking
-            let wasmModule = null;
-            let wasmMemory = null;
-            let actualItems = new Set();
-
-            // Load WASM module
-            async function loadWASM() {
-                try {
-                    const response = await fetch("wasm/wood.wasm");
-                    if (!response.ok) {
-                        throw new Error(
-                            `HTTP ${response.status}: ${response.statusText}`,
-                        );
-                    }
-
-                    const bytes = await response.arrayBuffer();
-                    const module = await WebAssembly.compile(bytes);
-
-                    wasmModule = await WebAssembly.instantiate(module, {
-                        env: {
-                            // Provide any required imports here
-                        },
-                    });
-
-                    wasmModule.exports.hll_init(16);
-                } catch (error) {
-                    console.error("Failed to load WASM:", error);
-                }
-            }
-
-            // Write string to WASM memory
-            function writeStringToWasm(str) {
-                const encoder = new TextEncoder();
-                const bytes = encoder.encode(str);
-
-                if (!wasmMemory) {
-                    wasmMemory = wasmModule.exports.memory;
-                }
-
-                const ptr = 1000; // fixed offset (for demo only)
-                const view = new Uint8Array(wasmMemory.buffer);
-                view.set(bytes, ptr);
-
-                return { ptr, len: bytes.length };
-            }
-
-            function addToHLL() {
-                const input = document.getElementById("hll-input").value;
-                if (!input) return;
-
-                const { ptr, len } = writeStringToWasm(input);
-                wasmModule.exports.hll_add(ptr, len);
-
-                actualItems.add(input);
-                updateStats();
-                updateItemsList();
-
-                document.getElementById("hll-input").value = "";
-            }
-
-            function resetHLL() {
-                wasmModule.exports.hll_reset();
-                actualItems.clear();
-                updateStats();
-                document.getElementById("items-list").innerHTML = "";
-            }
-
-            function updateStats() {
-                const actual = actualItems.size;
-                const estimate = Math.round(wasmModule.exports.hll_count());
-
-                const error =
-                    actual === 0
-                        ? 0
-                        : Math.abs(((estimate - actual) / actual) * 100);
-
-                document.getElementById("actual-count").textContent = actual;
-                document.getElementById("hll-estimate").textContent = estimate;
-                document.getElementById("error-rate").textContent =
-                    error.toFixed(1) + "%";
-            }
-
-            function updateItemsList() {
-                const items = Array.from(actualItems);
-                const display =
-                    items.length > 20
-                        ? items.slice(-20).join(", ") + "..."
-                        : items.join(", ");
-                document.getElementById("items-list").textContent = display;
-            }
-
-            // Initialize WASM on page load
-            window.addEventListener("load", loadWASM);
-        </script>
-
+        <h2>References</h2>
+        <ul>
+            <li>
+                Philippe Flajolet, Éric Fusy, Olivier Gandouet, and Frédéric Meunier. 
+                <a href="https://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf" target="_blank">"HyperLogLog: The analysis of a near-optimal cardinality estimation algorithm"</a>
+            </li>
+            <li>
+                <a href="https://research.google/pubs/pub40671/" target="_blank">Google. <strong>"HyperLogLog in Practice"</strong>, 2013.</a>
+            </li>
+            <li>
+                <a href="https://engineering.fb.com/2018/12/13/data-infrastructure/hyperloglog/" target="_blank">Meta (Facebook). <strong>"Presto: Distributed SQL Query Engine"</strong> — HyperLogLog implementation. </a>
+            </li>
+        </ul>
         <style>
-            input,
-            button {
-                font-family: "Source Code Pro", monospace;
-            }
+        input,
+        button {
+            font-family: "Source Code Pro", monospace;
+        }
 
-            button:hover {
-                background-color: #555 !important;
-            }
+        button:hover {
+            background-color: #555 !important;
+        }
 
-            #demo-output,
-            #hll-stats {
-                font-size: 14px;
-                line-height: 1.4;
-            }
+        #demo-output,
+        #hll-stats {
+            font-size: 14px;
+            line-height: 1.4;
+        }
 
-            #demo-output div,
-            #hll-stats div {
-                margin: 5px 0;
-            }
+        #demo-output div,
+        #hll-stats div {
+            margin: 5px 0;
+        }
 
-            .blog_title {
-                font-size: 24px;
-                font-weight: bold;
-                margin: 30px 0;
-                border-bottom: 1px dashed #444;
-                padding-bottom: 10px;
-            }
+        .blog_title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 30px 0;
+            border-bottom: 1px dashed #444;
+            padding-bottom: 10px;
+        }
 
-            h3 {
-                color: #fff;
-                margin: 30px 0 15px 0;
-                font-size: 18px;
-            }
+        h3 {
+            color: #fff;
+            margin: 30px 0 15px 0;
+            font-size: 18px;
+        }
 
-            ul li {
-                margin: 8px 0;
-            }
+        ul li {
+            margin: 8px 0;
+        }
 
-            pre {
-                overflow-x: auto;
-                background-color: #1a1a1a;
-                border-left: 4px solid #444;
-                padding: 15px;
-                margin: 20px 0;
-            }
+        pre {
+            overflow-x: auto;
+            background-color: #1a1a1a;
+            border-left: 4px solid #444;
+            padding: 15px;
+            margin: 20px 0;
+        }
 
-            code {
-                font-family: "Source Code Pro", monospace;
-            }
-        </style>
+        code {
+            font-family: "Source Code Pro", monospace;
+        }
+    </style>
     </body>
 </html>
