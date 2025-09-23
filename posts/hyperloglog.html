@@ -105,18 +105,6 @@
                 Add Item
             </button>
             <button
-                onclick="addRandomItems()"
-                style="
-                    background: #444;
-                    color: #fff;
-                    border: 1px solid #666;
-                    padding: 8px 16px;
-                    margin-left: 10px;
-                "
-            >
-                Add 100 Random
-            </button>
-            <button
                 onclick="resetHLL()"
                 style="
                     background: #444;
@@ -217,7 +205,6 @@
                         },
                     });
 
-                    // Initialize HyperLogLog with precision 4 (16 buckets)
                     wasmModule.exports.hll_init(16);
                 } catch (error) {
                     console.error("Failed to load WASM:", error);
@@ -252,19 +239,6 @@
                 updateItemsList();
 
                 document.getElementById("hll-input").value = "";
-            }
-
-            function addRandomItems() {
-                for (let i = 0; i < 100; i++) {
-                    const randomItem = "item_" + Math.floor(Math.random() * 1000000);
-
-                    const { ptr, len } = writeStringToWasm(randomItem);
-                    wasmModule.exports.hll_add(ptr, len);
-
-                    actualItems.add(randomItem);
-                }
-                updateStats();
-                updateItemsList();
             }
 
             function resetHLL() {
