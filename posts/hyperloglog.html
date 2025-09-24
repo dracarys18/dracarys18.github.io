@@ -49,7 +49,7 @@
             HyperLogLog: Counting without Counting
         </div>
         <p>
-         Every time I read about a probabilistic data structure, I’m blown away — like, who even came up with this stuff? (It's Philippe Flajolet a french scientist) Even after I understand how it works, it still feels magical, like it answered the question out of thin air.In this blog, I’ll explain how it works — with as few Greek letters as possible so you have your mind blown too :)
+        Every time I read about a probabilistic data structure, I’m blown away — like, who even came up with this stuff? (Philippe Flajolet did). Even after I understand how it works, it still feels magical.</p><p>In this blog, I’ll explain how it works — with as few Greek letters as possibl, So you have your mind blown too :)</p>
         </p>
         <p>
           I've implemented the HyperLogLog algorithm in Zig. Check out the repository here:
@@ -68,7 +68,7 @@
         Counting unique elements is a memory heavy task, it requires you to remember all the elements that has ever been pushed to the set which could be very high. Hyperloglog on the other hand uses small constant amount of memory to get the unique count.
         </p>
         <p>
-        With just 16KB of memory it can count the cardinality of billions of items with error rate below 1%
+        With just 16KB of memory it can count the cardinality of billions of items with <strong>error rate below 1%</strong>
         </p>
 
         <h3 id="intuition">## How does it work?</h3>
@@ -84,7 +84,7 @@
         </p>
 
         <p>
-            So why hash the bits why not just count the zeroes in raw bits? Hashing the value gives you randoml-looking distribution of bits without hashing, the raw input values might have patterns or clusters that bias the algorithm, making our estimates inaccurate.
+            So why hash the bits why not just count the zeroes in raw bits? Hashing the value gives you random-looking distribution of bits without hashing whereas the raw input values might have patterns or clusters that will bias to the algorithm, making our estimates inaccurate.
         </p>
         <p>
             In a large set of numbers, there’s a high chance that some values will be unusual or extreme. To reduce the effect of these “freak” values, HyperLogLog divides the numbers into multiple buckets. The more buckets you have, the more accurate the estimate becomes. When initializing HyperLogLog, you provide a precision <code>p</code>, which determines the number of buckets as <code>2^p</code>.
