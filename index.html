@@ -34,19 +34,27 @@
         <div class = "welcome">
             <h2> What do I do </h2>
         </div>
-    </div>
     <p>I'm a Backend and Systems Engineer who makes sure my code doesn't just work in theory, but runs smoothly on the infrastructure too. It's like being both the architect and the building manager.</p>
     <p>Occasionally I venture into frontend territory when the mood strikes—this website you're looking at right now? Yeah, that was one of those moments.</p>
+        <div class= "welcome">
+          <h2>🎥 Live on Twitch (Sometimes!)</h2>
+        </div>
+        <div id="twitch-embed" style="position:relative;padding-top:56.25%;height:0;overflow:hidden;">
+         </div>
 
-    <div style="text-align:center; margin-top:2em;">
-      <h2>🎥 Live on Twitch (Sometimes!)</h2>
-      <iframe
-        src="https://player.twitch.tv/?channel=segmentationfault18&parent=karthihegde.dev"
-        height="480"
-        width="854"
-        allowfullscreen>
-      </iframe>
-    </div>
+        <script>
+          const container = document.getElementById("twitch-embed");
+          const domain = window.location.hostname; // dynamically get current domain
+
+          container.innerHTML = `
+            <iframe
+              src="https://player.twitch.tv/?channel=segmentationfault18&parent=${domain}"
+              style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
+              allowfullscreen>
+            </iframe>
+          `;
+        </script>
+   </div>
 
     <div class="footer">
         <div class="social-links">
