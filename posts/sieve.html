@@ -3,23 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karthikey Hegde</title>
-    <link rel="stylesheet" href = "../styles.css">
+    <title>SIEVE: An Efficient Cache Eviction - Karthikey Hegde</title>
+    <meta name="description" content="Deep dive into SIEVE cache eviction algorithm, comparing it with LRU and exploring its implementation. Understanding modern caching strategies.">
+    <meta name="keywords" content="SIEVE, Cache Eviction, LRU, Caching Algorithms, Computer Science, Systems Programming">
+    <meta name="author" content="Karthikey Hegde">
 
-    <!-- Prism.js for syntax highlighting -->
+    <meta property="og:title" content="SIEVE: An Efficient Cache Eviction">
+    <meta property="og:description" content="Deep dive into SIEVE cache eviction algorithm, comparing it with LRU and exploring its implementation.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://karthihegde.dev/posts/sieve">
+    <meta property="og:site_name" content="Karthikey Hegde">
+    <meta property="article:published_time" content="2024-09-06">
+    <meta property="article:author" content="Karthikey Hegde">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@karthihegde">
+    <meta name="twitter:creator" content="@karthihegde">
+    <meta name="twitter:title" content="SIEVE: An Efficient Cache Eviction">
+    <meta name="twitter:description" content="Deep dive into SIEVE cache eviction algorithm, comparing it with LRU and exploring its implementation.">
+
+    <link rel="canonical" href="https://karthihegde.dev/posts/sieve">
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="../styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QMCKX3D5N7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-QMCKX3D5N7');
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-zig.min.js"></script>
 </head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-QMCKX3D5N7"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-QMCKX3D5N7');
-</script>
 <body>
     <div class="header">
         <nav>
@@ -28,7 +46,10 @@
             <a href="../posts.html" class="nav-link">/ posts</a>
         </nav>
     </div>
-    <div class = "blog_title">SIEVE: An Efficient Cache Eviction</div>
+    <div class="blog_title">SIEVE: An Efficient Cache Eviction</div>
+    <div style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 14px;">
+        Published on September 6, 2024
+    </div>
     <p>
       As we approach the 26th anniversary of the 21st century, hardware continues to get cheaper and more powerful.
       Data centers now operate with terabytes of RAM, a scale that would have been unimaginable not long ago.
@@ -39,13 +60,13 @@
         <figcaption class="image-quote">The Cloud</figcaption>
     </figure>
     <p>
-      Cache eviction algorithms have evolved a lot, and there’s no single strategy that fits every need. 
+      Cache eviction algorithms have evolved a lot, and there’s no single strategy that fits every need.
       That’s why we’ve ended up with so many of them.
     </p>
     <p>
-      I came across the SIEVE eviction policy and wanted to see how it really works. 
-      The best way to learn, at least for me, is to try building it myself. 
-      So I decided to write a cache with SIEVE eviction, using Zig as my language of choice. 
+      I came across the SIEVE eviction policy and wanted to see how it really works.
+      The best way to learn, at least for me, is to try building it myself.
+      So I decided to write a cache with SIEVE eviction, using Zig as my language of choice.
       Let’s see how it goes!
     </p>
 
@@ -141,15 +162,15 @@
     </code></pre>
     <h3 id = "get">## Lookup</h3>
     <p>
-      Now that we’ve covered how inserts work, let’s move on to lookups—the 
-      <code>get</code> operation. After all, the whole point of a cache is to serve 
-      as many requests as possible from memory, which means aiming for more cache 
+      Now that we’ve covered how inserts work, let’s move on to lookups—the
+      <code>get</code> operation. After all, the whole point of a cache is to serve
+      as many requests as possible from memory, which means aiming for more cache
       hits and fewer misses.
     </p>
     <p>
-      In LRU, every time you fetch an object from the cache, it’s moved to the back 
-      of the queue and treated as the most recently used. This means that even an 
-      occasional access is enough to keep the object from being evicted, as long as 
+      In LRU, every time you fetch an object from the cache, it’s moved to the back
+      of the queue and treated as the most recently used. This means that even an
+      occasional access is enough to keep the object from being evicted, as long as
       other items don’t crowd the cache beyond its limit.
     </p>
     <p>
@@ -193,8 +214,8 @@
     </code></pre>
     <h3 id = "eviction">## Eviction</h3>
     <p>
-      Now that we understand how lookups work, let’s move on to eviction. 
-      We’ve already touched on the idea of how items are chosen to be removed, 
+      Now that we understand how lookups work, let’s move on to eviction.
+      We’ve already touched on the idea of how items are chosen to be removed,
       but now it’s time to look at the actual mechanics of how eviction is carried out.
     </p>
     <pre><code class="language-zig">
@@ -224,13 +245,13 @@
     </code></pre>
     </p>
     <p>
-      Eviction is basically the moment when the cache decides who gets to stay 
-      and who has to go. In LRU, it’s simple — the item that’s been ignored the 
-      longest (sitting at the front of the queue) gets evicted.  
-      SIEVE handles this a little differently. It looks at the item at the front: 
-      if it’s been marked as <code>visited</code>, the cache clears that mark and 
-      gives the item another chance by moving it to the back. If it hasn’t been 
-      touched in a while, it’s shown the door. This way, things you actually use 
+      Eviction is basically the moment when the cache decides who gets to stay
+      and who has to go. In LRU, it’s simple — the item that’s been ignored the
+      longest (sitting at the front of the queue) gets evicted.
+      SIEVE handles this a little differently. It looks at the item at the front:
+      if it’s been marked as <code>visited</code>, the cache clears that mark and
+      gives the item another chance by moving it to the back. If it hasn’t been
+      touched in a while, it’s shown the door. This way, things you actually use
       tend to stick around, and the stale stuff slowly makes its way out.
     </p>
     <figure class="blog-gif">
@@ -239,9 +260,9 @@
     </figure>
     <h3 id="takeaways">## Takeaways</h3>
     <p>
-      Well that’s a wrap! If this stuff got you curious, I’ll drop a link to the full repo below.  
-      Honestly, the most fun part of writing this wasn’t typing out the blog—it was building 
-      SIEVE myself and seeing it click. I really believe the best way to learn is by rolling up 
+      Well that’s a wrap! If this stuff got you curious, I’ll drop a link to the full repo below.
+      Honestly, the most fun part of writing this wasn’t typing out the blog—it was building
+      SIEVE myself and seeing it click. I really believe the best way to learn is by rolling up
       your sleeves and trying it out. It scratches that curiosity itch in a way just reading never does.
     </p>
     <p>Oh also I am new to zig so if you are angry at how I wrote the code, I totally understand :p</p>
