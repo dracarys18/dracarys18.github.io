@@ -44,6 +44,8 @@
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://app.cal.com" />
         <link rel="dns-prefetch" href="https://player.twitch.tv" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
         <link rel="stylesheet" href="styles.css" />
 
@@ -244,40 +246,40 @@
             </div>
         </div>
 
-        <!-- Lazy load Twitch embed -->
-        <script>
+        <!-- Lazy load Twitch embed - deferred to not block rendering -->
+        <script defer>
             (function () {
                 const container = document.getElementById("twitch-embed");
                 if (!container) return;
 
                 const domain = window.location.hostname;
 
-                // Create iframe with loading attribute
-                const iframe = document.createElement("iframe");
-                iframe.src = `https://player.twitch.tv/?channel=segmentationfault18&parent=${domain}`;
-                iframe.style.cssText =
-                    "position:absolute;top:0;left:0;width:100%;height:100%;border:none;";
-                iframe.setAttribute("allowfullscreen", "");
-                iframe.setAttribute("loading", "lazy");
+                function loadTwitchEmbed() {
+                    const iframe = document.createElement("iframe");
+                    iframe.src = `https://player.twitch.tv/?channel=segmentationfault18&parent=${domain}`;
+                    iframe.style.cssText =
+                        "position:absolute;top:0;left:0;width:100%;height:100%;border:none;";
+                    iframe.setAttribute("allowfullscreen", "");
+                    iframe.setAttribute("loading", "lazy");
+                    container.appendChild(iframe);
+                }
 
-                // Load when in viewport
                 if ("IntersectionObserver" in window) {
                     const observer = new IntersectionObserver(
                         (entries) => {
                             entries.forEach((entry) => {
                                 if (entry.isIntersecting) {
-                                    container.appendChild(iframe);
+                                    loadTwitchEmbed();
                                     observer.disconnect();
                                 }
                             });
                         },
-                        { rootMargin: "100px" },
+                        { rootMargin: "200px" },
                     );
 
                     observer.observe(container);
                 } else {
-                    // Fallback for older browsers
-                    container.appendChild(iframe);
+                    setTimeout(loadTwitchEmbed, 2000);
                 }
             })();
         </script>
