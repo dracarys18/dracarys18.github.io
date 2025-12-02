@@ -40,6 +40,11 @@
 
         <link rel="canonical" href="https://karthihegde.dev/" />
 
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://app.cal.com https://player.twitch.tv https://*.twitch.tv; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://player.twitch.tv https://app.cal.com; connect-src 'self' https://www.google-analytics.com https://app.cal.com https://*.twitch.tv;"
+        />
+
         <!-- Resource hints for faster third-party connections -->
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://app.cal.com" />
@@ -330,6 +335,11 @@
                                 "position:absolute;top:0;left:0;width:100%;height:100%;border:none;";
                             i.setAttribute("allowfullscreen", "");
                             i.setAttribute("loading", "lazy");
+                            i.setAttribute("allow", "autoplay; fullscreen");
+                            i.setAttribute(
+                                "sandbox",
+                                "allow-scripts allow-same-origin allow-popups",
+                            );
                             c.appendChild(i);
                         };
                         if ("IntersectionObserver" in window) {
