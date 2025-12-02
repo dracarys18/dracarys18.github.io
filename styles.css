@@ -1,16 +1,27 @@
+:root {
+    --bg-primary: #000;
+    --bg-secondary: #111111;
+    --text-primary: #dbdbdb;
+    --text-secondary: #888;
+    --border-color: #444;
+    --border-light: #333;
+    --hover-bg: #333;
+    --max-width: 800px;
+}
+
 body {
-    background-color: #000;
-    color: #DBDBDB;
-    font-family: "Source Code Pro",monospace;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: "Source Code Pro", monospace;
     line-height: 1.6;
-    max-width: 800px;
+    max-width: var(--max-width);
     margin: 0 auto;
     padding: 20px;
     font-size: 16px;
 }
 
 a {
-    color: #DBDBDB;
+    color: var(--text-primary);
     text-decoration: none;
 }
 
@@ -18,9 +29,10 @@ a:hover {
     text-decoration: underline;
 }
 
-.header, .footer {
-    border-top: 1px dashed #444;
-    border-bottom: 1px dashed #444;
+.header,
+.footer {
+    border-top: 1px dashed var(--border-color);
+    border-bottom: 1px dashed var(--border-color);
     padding: 10px 0;
     margin: 20px 0;
     text-align: right;
@@ -49,7 +61,7 @@ a:hover {
 }
 
 .date {
-    color: #888;
+    color: var(--text-secondary);
     margin-right: 8px;
     white-space: nowrap;
 }
@@ -84,7 +96,6 @@ a:hover {
     margin-bottom: 20px;
 }
 
-
 .blog_title {
     font-size: 30px;
     font-weight: 800;
@@ -107,7 +118,7 @@ a:hover {
 .image-quote {
     font-style: italic;
     margin-top: 10px;
-    color: #555;
+    color: var(--text-secondary);
     max-width: 80%;
     margin-left: auto;
     margin-right: auto;
@@ -116,43 +127,36 @@ a:hover {
 .social-links {
     display: flex;
     gap: 15px;
-    justify-content: flex-end
+    justify-content: flex-end;
 }
 
 .social-icon {
-    display: inline-block;
     width: 40px;
     height: 40px;
-    background-color: #111111;
-    border: 1px solid #333;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
     border-radius: 5px;
     display: flex;
-    align: right;
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s;
 }
 
 .social-icon-calendar {
-    display: inline-block;
     width: 40px;
     height: 40px;
-    background-color: #111111;
-    border: 1px solid #333;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
     border-radius: 5px;
     display: flex;
-    align: left;
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s;
 }
 
-.social-icon-calendar:hover {
-    background-color: #333;
-}
-
+.social-icon-calendar:hover,
 .social-icon:hover {
-    background-color: #333;
+    background-color: var(--hover-bg);
 }
 
 .social-icon img {
@@ -168,7 +172,8 @@ a:hover {
         font-size: 14px;
     }
 
-    .header, .footer {
+    .header,
+    .footer {
         text-align: left;
     }
 
@@ -198,26 +203,26 @@ a:hover {
         margin: 30px auto;
     }
     .blog-gif {
-        max-width: 90%;   /* slightly smaller on small screens */
-        margin: 20px auto; 
+        max-width: 90%; /* slightly smaller on small screens */
+        margin: 20px auto;
     }
 }
 
 .blog-gif {
-  max-width: 100%;       /* take full width of container */
-  height: auto;          /* maintain aspect ratio */
-  display: block;
-  margin: 20px auto;     /* center horizontally with auto margins */
-  border-radius: 8px;
+    max-width: 100%; /* take full width of container */
+    height: auto; /* maintain aspect ratio */
+    display: block;
+    margin: 20px auto; /* center horizontally with auto margins */
+    border-radius: 8px;
 }
 
 /* Code block styling to match site theme */
 pre[class*="language-"] {
-    background: #111111;   /* match your blog’s background tone */
-    color: #eaeaea;        /* light text */
+    background: var(--bg-secondary);
+    color: #eaeaea;
     padding: 16px;
     border-radius: 8px;
-    border: 1px solid #333;
+    border: 1px solid var(--border-light);
     overflow-x: auto;
     font-size: 14px;
     line-height: 1.5;
