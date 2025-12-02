@@ -5,10 +5,13 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write
+
 jobs:
   build-deploy:
     name: Build and Deploy
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
@@ -22,5 +25,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./
-
-
