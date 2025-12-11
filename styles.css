@@ -77,14 +77,13 @@ em {
 blockquote {
     margin: 30px auto;
     padding: 20px 24px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    border: 2pt solid #0f4c75;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
     text-align: center;
     font-size: 18px;
     font-family: "Fira Code", "Courier New", monospace;
-    color: #f0f0f0;
+    color: var(--text-primary);
     max-width: 90%;
     overflow-x: auto;
     border-left: none;
@@ -357,18 +356,17 @@ code[data-lang]::before {
 
 /* Math formula blocks (plain pre/code without language class or data-lang) */
 pre:not([class]):not(:has(code[data-lang])) {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    color: #f0f0f0;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
     padding: 20px 24px;
     border-radius: 8px;
-    border: 2px solid #0f4c75;
+    border: 1px solid var(--border-light);
     overflow-x: auto;
     font-size: 16px;
     line-height: 1.8;
     font-family: "Fira Code", "Courier New", monospace;
     margin: 30px 0;
     text-align: center;
-    box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
 }
 
 pre:not([class]):not(:has(code[data-lang])) code {
@@ -440,14 +438,13 @@ code[class*="language-"] {
 .formula {
     margin: 30px auto;
     padding: 20px 24px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    border: 2px solid #0f4c75;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
     text-align: center;
     font-size: 18px;
     font-family: "Fira Code", "Courier New", monospace;
-    color: #f0f0f0;
+    color: var(--text-primary);
     max-width: 90%;
     overflow-x: auto;
 }
