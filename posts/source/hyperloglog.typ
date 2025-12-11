@@ -8,8 +8,6 @@
 
 // Content starts here
 
-= #title
-
 Every time I read about a probabilistic data structure, I'm blown away — like, who even came up with this stuff? (Philippe Flajolet did). Even after I understand how it works, it still feels magical.
 
 In this blog, I'll explain how it works — with as few Greek letters as possible, So you have your mind blown too :)
@@ -24,27 +22,31 @@ With just 16KB of memory it can count the cardinality of billions of items with 
 
 == How does it work?
 
-Imagine you have a byte. What are the chances that the first bit is zero? It's 50%. What about the first two bits being zero? That's 25%. In general, the probability that the first $n$ bits are zero is:
+Imagine you have a byte. What are the chances that the first bit is zero? It's 50%. What about the first two bits being zero? That's 25%. In general, the probability that the first `n` bits are zero is:
 
-$ P("first" n "bits are zero") = 1 / 2^n $
+```
+P(first n bits are zero) = 1 / 2^n
+```
 
-For example, the probability that the first 10 bits are all zero is $1/1024$. This means that, on average, you would need 1,024 numbers to get one where the first 10 bits are zero.
+For example, the probability that the first 10 bits are all zero is 1/1024. This means that, on average, you would need 1,024 numbers to get one where the first 10 bits are zero.
 
 That's the basic idea of HyperLogLog it estimates the number of unique number in the set by just using the first n leading zeroes of the hashed values
 
 So why hash the bits why not just count the zeroes in raw bits? Hashing the value gives you random-looking distribution of bits without hashing whereas the raw input values might have patterns or clusters that will bias to the algorithm, making our estimates inaccurate.
 
-In a large set of numbers, there's a high chance that some values will be unusual or extreme. To reduce the effect of these "freak" values, HyperLogLog divides the numbers into multiple buckets. The more buckets you have, the more accurate the estimate becomes. When initializing HyperLogLog, you provide a precision $p$, which determines the number of buckets as:
+In a large set of numbers, there's a high chance that some values will be unusual or extreme. To reduce the effect of these "freak" values, HyperLogLog divides the numbers into multiple buckets. The more buckets you have, the more accurate the estimate becomes. When initializing HyperLogLog, you provide a precision `p`, which determines the number of buckets as:
 
-$ m = 2^p $
+```
+m = 2^p
+```
 
-After using the first $p$ bits to pick a bucket, the remaining bits of the hash are used to count the number of leading zeros. This is the clever part that allows HyperLogLog to estimate the total number of unique items.
+After using the first `p` bits to pick a bucket, the remaining bits of the hash are used to count the number of leading zeros. This is the clever part that allows HyperLogLog to estimate the total number of unique items.
 
 Each bucket keeps track of the largest number of leading zeros it has seen. Later, HyperLogLog combines the information from all buckets to produce a single estimate. By using multiple buckets, the highs and lows from random chance balance out, giving a much more reliable result — all while using very little memory.
 
 == Count(Main Part)
 
-Now that we understand there are $m = 2^p$ buckets and each bucket stores the largest number of leading zeros it has seen, it's time to look at how HyperLogLog uses this information to estimate the total number of unique items.
+Now that we understand there are m = 2^p buckets and each bucket stores the largest number of leading zeros it has seen, it's time to look at how HyperLogLog uses this information to estimate the total number of unique items.
 
 HyperLogLog combines the data from all buckets using a simple idea: if some buckets have very high leading-zero counts, it means the dataset is likely large. If most buckets have small counts, the dataset is smaller. By averaging these counts and applying a correction formula, HyperLogLog calculates an estimate of the number of unique elements.
 
@@ -52,22 +54,26 @@ The formula might look complicated at first, but the intuition is straightforwar
 
 The HyperLogLog estimate is given by:
 
-$ E = alpha_m dot m^2 dot (sum_(j=1)^m 2^(-M[j]))^(-1) $
+```
+E = α_m × m² × (Σ(j=1 to m) 2^(-M[j]))^(-1)
+```
 
 Where:
 
-- $E$ = estimated number of unique items
-- $m = 2^p$ = number of buckets
-- $M[j]$ = largest number of leading zeros observed in bucket $j$
-- $alpha_m$ = bias correction constant (depends on $m$)
+- E = estimated number of unique items
+- m = 2^p = number of buckets
+- M[j] = largest number of leading zeros observed in bucket j
+- α_m = bias correction constant (depends on m)
 
 Woah, woah! I promised no Greek letters… I tried, but let me explain.
 
 Let's focus on the inner part of the formula:
 
-$ m^2 dot (sum_(j=1)^m 2^(-M[j]))^(-1) $
+```
+m² × (Σ(j=1 to m) 2^(-M[j]))^(-1)
+```
 
-In this formula, $j$ is the bucket number, and $M[j]$ is the maximum count of leading zeros seen in that bucket. As we saw before, $1/2^(M[j])$ roughly estimates how many items ended up in that bucket.
+In this formula, j is the bucket number, and M[j] is the maximum count of leading zeros seen in that bucket. As we saw before, 1/2^(M[j]) roughly estimates how many items ended up in that bucket.
 
 Up to this point, we've only looked at one bucket's estimate. You might think we could just average all the buckets, but a single very large value can throw off the result. HyperLogLog avoids this by using the *harmonic mean*, which evens out the buckets and keeps the estimate more accurate. Thus the reciprocal on the sum on the formula multiplied by the bucket size. The harmonic mean only tells us the average estimate for a single bucket. To estimate the total number of unique items across all buckets, we multiply it by the total number of buckets.
 
@@ -82,20 +88,24 @@ When Hyperloglog was initially developed the researchers went through a lot of d
 
 Here's the formula for bias correction:
 
-- For $m = 16$: $alpha_m = 0.673$
-- For $m = 32$: $alpha_m = 0.697$
-- For $m = 64$: $alpha_m = 0.709$
-- For $m >= 128$: 
+- For m = 16: α_m = 0.673
+- For m = 32: α_m = 0.697
+- For m = 64: α_m = 0.709
+- For m >= 128:
 
-$ alpha_m = 0.7213 / (1 + 1.079 / m) $
+```
+α_m = 0.7213 / (1 + 1.079 / m)
+```
 
-So why does $alpha_m$ change based on the number of buckets? When the number of buckets is small, the estimate tends to have a slightly different bias than when the number of buckets is large. The constant $alpha_m$ adjusts for this difference to keep the estimate accurate.
+So why does α_m change based on the number of buckets? When the number of buckets is small, the estimate tends to have a slightly different bias than when the number of buckets is large. The constant α_m adjusts for this difference to keep the estimate accurate.
 
 == Error Rate
 
 So after all these calculations, the formula for Hyperloglog standard error rate is:
 
-$ "Standard Error" = 1.04 / sqrt(m) $
+```
+Standard Error = 1.04 / √m
+```
 
 The smaller the number of buckets, the higher the error will be. Each bucket stores a small number (the maximum number of leading zeros seen), so using fewer buckets means less memory is used but also less information is captured, which increases the error.
 

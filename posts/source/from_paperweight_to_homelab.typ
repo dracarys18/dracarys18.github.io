@@ -8,8 +8,6 @@
 
 // Content starts here
 
-= #title
-
 As I was going through my daily routine, I received that dreaded Google Photos notification: 'Your storage is 70% full. Upgrade your plan for more storage.' The frustration set in immediately—I had just upgraded my plan a week ago! While pondering how I'd already consumed so much space, my gaze drifted to my old laptop gathering dust on the shelf, with its unused 2TB SSD and substantial computing power sitting idle. In that moment, the idea of self-hosting clicked into place like the final piece of a puzzle.
 
 #figure(

@@ -8,8 +8,6 @@
 
 // Content starts here
 
-= #title
-
 As we approach the 26th anniversary of the 21st century, hardware continues to get cheaper and more powerful. Data centers now operate with terabytes of RAM, a scale that would have been unimaginable not long ago. Yet, as the old saying goes, Memory is never truly infinite.
 
 #figure(
