@@ -387,3 +387,37 @@ code[class*="language-"] {
 .token.boolean {
     color: #569cd6;
 }
+
+/* KaTeX math rendering styling */
+.katex-display {
+    margin: 30px 0;
+    padding: 24px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #0f4c75;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
+    overflow-x: auto;
+}
+
+.katex-display > .katex {
+    text-align: center;
+    color: #f0f0f0;
+}
+
+.katex {
+    font-size: 1.1em;
+    color: #f0f0f0;
+}
+
+/* Inline math should blend with text */
+.katex-html {
+    color: inherit;
+}
+
+/* Make math symbols crisp */
+.katex .mord,
+.katex .mbin,
+.katex .mrel,
+.katex .mop {
+    color: #f0f0f0;
+}
