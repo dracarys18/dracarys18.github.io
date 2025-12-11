@@ -1,8 +1,8 @@
 // Metadata
 #let title = "HyperLogLog: Counting without Counting"
 #let slug = "hyperloglog"
-#let date_display = "September 24, 2024"
-#let date_iso = "2024-09-24"
+#let date_display = "September 24, 2025"
+#let date_iso = "2025-09-24"
 #let description = "Deep dive into HyperLogLog, a probabilistic counting algorithm that estimates cardinality with minimal memory. Implementation and mathematical analysis included."
 #let keywords = "HyperLogLog, Probabilistic Algorithms, Cardinality Estimation, Data Structures, Computer Science"
 
