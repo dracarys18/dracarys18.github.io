@@ -36,6 +36,8 @@ jobs:
             filename=$(basename "$file" .typ)
             python3 scripts/build_blog.py "$file" "posts/${filename}.html"
           done
+          # Remove .gitignore so HTML files get deployed
+          rm .gitignore
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
