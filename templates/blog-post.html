@@ -64,6 +64,12 @@
     <div style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 14px;">
         Published on {{DATE_DISPLAY}}
     </div>
+    {% if IS_SVG %}
+    <div style="width: 100%; max-width: 800px; margin: 0 auto; overflow-x: auto;">
+        {{CONTENT|safe}}
+    </div>
+    {% else %}
     {{CONTENT}}
+    {% endif %}
 </body>
 </html>
