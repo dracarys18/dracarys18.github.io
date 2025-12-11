@@ -312,20 +312,51 @@ h6 {
 
 /* Code block styling to match site theme */
 pre[class*="language-"] {
-    background: var(--bg-secondary);
-    color: #eaeaea;
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary);
     padding: 16px;
-    border-radius: 8px;
+    border-radius: 6px;
     border: 1px solid var(--border-light);
     overflow-x: auto;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
     font-family: "Fira Code", "Courier New", monospace;
     margin: 20px 0;
 }
 
-/* Math formula blocks (plain pre/code without language class) */
-pre:not([class]) {
+/* Code blocks with data-lang attribute (from Typst) */
+pre code[data-lang] {
+    background: transparent !important;
+    color: var(--text-primary);
+    padding: 0;
+    display: block;
+    font-family: "Fira Code", "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Parent pre tag for code[data-lang] */
+pre:has(code[data-lang]) {
+    background: var(--bg-secondary) !important;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    margin: 20px 0;
+    overflow-x: auto;
+}
+
+/* Override any inline span backgrounds inside code blocks */
+code[data-lang] span {
+    background: transparent !important;
+}
+
+/* Hide the data-lang attribute display */
+code[data-lang]::before {
+    content: none;
+}
+
+/* Math formula blocks (plain pre/code without language class or data-lang) */
+pre:not([class]):not(:has(code[data-lang])) {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     color: #f0f0f0;
     padding: 20px 24px;
@@ -340,7 +371,7 @@ pre:not([class]) {
     box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
 }
 
-pre:not([class]) code {
+pre:not([class]):not(:has(code[data-lang])) code {
     background: transparent;
     padding: 0;
     border-radius: 0;
