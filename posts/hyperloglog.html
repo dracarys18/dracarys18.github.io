@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyperLogLog: Counting without Counting - Karthikey Hegde</title>
+    <meta name="description" content="Deep dive into HyperLogLog, a probabilistic counting algorithm that estimates cardinality with minimal memory. Implementation and mathematical analysis included.">
+    <meta name="keywords" content="HyperLogLog, Probabilistic Algorithms, Cardinality Estimation, Data Structures, Computer Science">
+    <meta name="author" content="Karthikey Hegde">
+
+    <meta property="og:title" content="HyperLogLog: Counting without Counting">
+    <meta property="og:description" content="Deep dive into HyperLogLog, a probabilistic counting algorithm that estimates cardinality with minimal memory. Implementation and mathematical analysis included.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://karthihegde.dev/posts/hyperloglog">
+    <meta property="og:site_name" content="Karthikey Hegde">
+    <meta property="article:published_time" content="2024-09-24">
+    <meta property="article:author" content="Karthikey Hegde">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@karthihegde">
+    <meta name="twitter:creator" content="@karthihegde">
+    <meta name="twitter:title" content="HyperLogLog: Counting without Counting">
+    <meta name="twitter:description" content="Deep dive into HyperLogLog, a probabilistic counting algorithm that estimates cardinality with minimal memory. Implementation and mathematical analysis included.">
+
+    <link rel="canonical" href="https://karthihegde.dev/posts/hyperloglog">
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QMCKX3D5N7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-QMCKX3D5N7');
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-zig.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <nav>
+            <a href="/" class="nav-link">/ karthihegde</a>
+            <a href="../contact.html" class="nav-link">/ contact</a>
+            <a href="../posts.html" class="nav-link">/ posts</a>
+        </nav>
+    </div>
+    <div class="blog_title">HyperLogLog: Counting without Counting</div>
+    <div style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 14px;">
+        Published on September 24, 2024
+    </div>
+    <h2>HyperLogLog: Counting without Counting</h2>
+    <p>Every time I read about a probabilistic data structure, I’m blown away — like, who even came up with this stuff? (Philippe Flajolet did). Even after I understand how it works, it still feels magical.</p>
+    <p>In this blog, I’ll explain how it works — with as few Greek letters as possible, So you have your mind blown too :)</p>
+    <p>I’ve implemented the HyperLogLog algorithm in Zig. Check out the repository here: <a href="https://github.com/dracarys18/wood"><a href="https://github.com/dracarys18/wood">https://github.com/dracarys18/wood</a></a></p>
+    <h3>Counting Unique Elements</h3>
+    <p>Counting unique elements is a memory heavy task, it requires you to remember all the elements that has ever been pushed to the set which could be very high. Hyperloglog on the other hand uses small constant amount of memory to get the unique count.</p>
+    <p>With just 16KB of memory it can count the cardinality of billions of items with <strong>error rate below 1%</strong></p>
+    <h3>How does it work?</h3>
+    <p>Imagine you have a byte. What are the chances that the first bit is zero? It’s 50%. What about the first two bits being zero? That’s 25%. In general, the probability that the first</p>
+    <p>bits are zero is:</p>
+    <p>For example, the probability that the first 10 bits are all zero is</p>
+    <p>. This means that, on average, you would need 1,024 numbers to get one where the first 10 bits are zero.</p>
+    <p>That’s the basic idea of HyperLogLog it estimates the number of unique number in the set by just using the first n leading zeroes of the hashed values</p>
+    <p>So why hash the bits why not just count the zeroes in raw bits? Hashing the value gives you random-looking distribution of bits without hashing whereas the raw input values might have patterns or clusters that will bias to the algorithm, making our estimates inaccurate.</p>
+    <p>In a large set of numbers, there’s a high chance that some values will be unusual or extreme. To reduce the effect of these “freak” values, HyperLogLog divides the numbers into multiple buckets. The more buckets you have, the more accurate the estimate becomes. When initializing HyperLogLog, you provide a precision</p>
+    <p>, which determines the number of buckets as:</p>
+    <p>After using the first</p>
+    <p>bits to pick a bucket, the remaining bits of the hash are used to count the number of leading zeros. This is the clever part that allows HyperLogLog to estimate the total number of unique items.</p>
+    <p>Each bucket keeps track of the largest number of leading zeros it has seen. Later, HyperLogLog combines the information from all buckets to produce a single estimate. By using multiple buckets, the highs and lows from random chance balance out, giving a much more reliable result — all while using very little memory.</p>
+    <h3>Count(Main Part)</h3>
+    <p>Now that we understand there are</p>
+    <p>buckets and each bucket stores the largest number of leading zeros it has seen, it’s time to look at how HyperLogLog uses this information to estimate the total number of unique items.</p>
+    <p>HyperLogLog combines the data from all buckets using a simple idea: if some buckets have very high leading-zero counts, it means the dataset is likely large. If most buckets have small counts, the dataset is smaller. By averaging these counts and applying a correction formula, HyperLogLog calculates an estimate of the number of unique elements.</p>
+    <p>The formula might look complicated at first, but the intuition is straightforward: each bucket gives a hint about the size of the dataset, and combining all these hints produces a reliable estimate without ever storing all the items.</p>
+    <p>The HyperLogLog estimate is given by:</p>
+    <p>Where:</p>
+    <ul>
+      <li>
+        <p>= estimated number of unique items</p>
+      </li>
+      <li>
+        <p>= number of buckets</p>
+      </li>
+      <li>
+        <p>= largest number of leading zeros observed in bucket</p>
+      </li>
+      <li>
+        <p>= bias correction constant (depends on</p>
+        <p>)</p>
+      </li>
+    </ul>
+    <p>Woah, woah! I promised no Greek letters… I tried, but let me explain.</p>
+    <p>Let’s focus on the inner part of the formula:</p>
+    <p>In this formula,</p>
+    <p>is the bucket number, and</p>
+    <p>is the maximum count of leading zeros seen in that bucket. As we saw before,</p>
+    <p>roughly estimates how many items ended up in that bucket.</p>
+    <p>Up to this point, we’ve only looked at one bucket’s estimate. You might think we could just average all the buckets, but a single very large value can throw off the result. HyperLogLog avoids this by using the <strong>harmonic mean</strong>, which evens out the buckets and keeps the estimate more accurate. Thus the reciprocal on the sum on the formula multiplied by the bucket size. The harmonic mean only tells us the average estimate for a single bucket. To estimate the total number of unique items across all buckets, we multiply it by the total number of buckets.</p>
+    <p>Now we have finished explaining the basic estimate, but this number can vary for very small or very large datasets:</p>
+    <ul>
+      <li><strong>Small range:</strong> When the dataset is small, many buckets are still zero. In this case, the formula tends to underestimate the number of unique items.</li>
+      <li><strong>Large range:</strong> When the dataset is very large, the formula can overestimate the count significantly.</li>
+    </ul>
+    <p>Now this is where the mysterious Greek letter comes in. It’s called the <strong>bias correction constant</strong>, and its job is to make the estimate slightly more accurate.</p>
+    <p>When Hyperloglog was initially developed the researchers went through a lot of data and checked the ratio between raw estimate and actual count and came up with the bias correction constant</p>
+    <p>Here’s the formula for bias correction:</p>
+    <ul>
+      <li>
+        <p>For</p>
+        <p>:</p>
+      </li>
+      <li>
+        <p>For</p>
+        <p>:</p>
+      </li>
+      <li>
+        <p>For</p>
+        <p>:</p>
+      </li>
+      <li>
+        <p>For</p>
+        <p>:</p>
+      </li>
+    </ul>
+    <p>So why does</p>
+    <p>change based on the number of buckets? When the number of buckets is small, the estimate tends to have a slightly different bias than when the number of buckets is large. The constant</p>
+    <p>adjusts for this difference to keep the estimate accurate.</p>
+    <h3>Error Rate</h3>
+    <p>So after all these calculations, the formula for Hyperloglog standard error rate is:</p>
+    <p>The smaller the number of buckets, the higher the error will be. Each bucket stores a small number (the maximum number of leading zeros seen), so using fewer buckets means less memory is used but also less information is captured, which increases the error.</p>
+    <h3>Conclusion</h3>
+    <p>Well, there you have it, a deep dive into probabilistic counting! When I first read the original HyperLogLog paper, it was full of math and symbols, and it took me a while to wrap my head around it. Here, I’ve tried to make it as simple and readable as possible. I hope you enjoyed it! I didn’t include all the code examples because the blog was already long enough, but you can always check out the implementation on my GitHub.</p>
+    <h3>References</h3>
+    <ul>
+      <li>Philippe Flajolet, Éric Fusy, Olivier Gandouet, and Frédéric Meunier. <a href="https://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf">HyperLogLog: The analysis of a near-optimal cardinality estimation algorithm</a></li>
+      <li><a href="https://research.google/pubs/pub40671/">Google. “HyperLogLog in Practice”, 2013.</a></li>
+      <li><a href="https://engineering.fb.com/2018/12/13/data-infrastructure/hyperloglog/">Meta (Facebook). “Presto: Distributed SQL Query Engine” — HyperLogLog implementation.</a></li>
+    </ul>
+</body>
+</html>

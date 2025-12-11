@@ -7,8 +7,6 @@
 #let keywords = "SIEVE, Cache Eviction, LRU, Caching Algorithms, Computer Science, Systems Programming"
 
 // Content starts here
-#set text(font: "Source Code Pro", size: 11pt)
-#set page(paper: "a4")
 
 = #title
 
