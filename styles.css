@@ -73,6 +73,23 @@ em {
     font-style: italic;
 }
 
+/* Formula blocks using blockquote */
+blockquote {
+    margin: 30px auto;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2pt solid #0f4c75;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
+    text-align: center;
+    font-size: 18px;
+    font-family: "Fira Code", "Courier New", monospace;
+    color: #f0f0f0;
+    max-width: 90%;
+    overflow-x: auto;
+    border-left: none;
+}
+
 figure {
     margin: 30px 0;
 }
@@ -388,45 +405,18 @@ code[class*="language-"] {
     color: #569cd6;
 }
 
-/* KaTeX math rendering styling */
-.katex-display {
-    margin: 30px 0;
-    padding: 24px;
+/* Formula blocks styling */
+.formula {
+    margin: 30px auto;
+    padding: 20px 24px;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     border: 2px solid #0f4c75;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
-    overflow-x: auto;
-}
-
-.katex-display > .katex {
     text-align: center;
+    font-size: 18px;
+    font-family: "Fira Code", "Courier New", monospace;
     color: #f0f0f0;
-}
-
-.katex {
-    font-size: 1.1em;
-    color: #f0f0f0;
-}
-
-/* Inline math should blend with text */
-.katex-html {
-    color: inherit;
-}
-
-/* Make math symbols crisp */
-.katex .mord,
-.katex .mbin,
-.katex .mrel,
-.katex .mop {
-    color: #f0f0f0;
-}
-
-/* SVG blog post styling */
-svg {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-    background-color: white;
+    max-width: 90%;
+    overflow-x: auto;
 }
