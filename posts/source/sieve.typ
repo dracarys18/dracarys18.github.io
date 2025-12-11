@@ -1,8 +1,8 @@
 // Metadata
 #let title = "SIEVE: An Efficient Cache Eviction"
 #let slug = "sieve"
-#let date_display = "September 6, 2024"
-#let date_iso = "2024-09-06"
+#let date_display = "September 6, 2025"
+#let date_iso = "2025-09-06"
 #let description = "Deep dive into SIEVE cache eviction algorithm, comparing it with LRU and exploring its implementation. Understanding modern caching strategies."
 #let keywords = "SIEVE, Cache Eviction, LRU, Caching Algorithms, Computer Science, Systems Programming"
 
