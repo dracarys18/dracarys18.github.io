@@ -49,6 +49,42 @@ a:hover {
     word-wrap: break-word;
 }
 
+/* Blog post content styling */
+p {
+    margin: 16px 0;
+    line-height: 1.7;
+}
+
+ul, ol {
+    margin: 16px 0;
+    padding-left: 25px;
+}
+
+li {
+    margin: 8px 0;
+}
+
+strong {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+em {
+    font-style: italic;
+}
+
+figure {
+    margin: 30px 0;
+}
+
+figcaption {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-top: 10px;
+    font-style: italic;
+}
+
 .post-list {
     list-style-type: none;
     padding: 0;
@@ -78,6 +114,8 @@ a:hover {
 .sidebar h3 {
     font-size: 1em;
     margin-bottom: 5px;
+    margin-top: 0;
+    font-weight: 600;
 }
 
 .sidebar ul {
@@ -101,6 +139,45 @@ a:hover {
     font-weight: 800;
     margin-bottom: 20px;
     text-align: center;
+}
+
+/* Blog post headings */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    line-height: 1.3;
+}
+
+h1 {
+    font-size: 2em;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+h2 {
+    font-size: 1.75em;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 8px;
+}
+
+h3 {
+    font-size: 1.5em;
+    font-weight: 700;
+}
+
+h4 {
+    font-size: 1.25em;
+}
+
+h5 {
+    font-size: 1.1em;
+}
+
+h6 {
+    font-size: 1em;
+    font-weight: 600;
 }
 
 .blog-image {
