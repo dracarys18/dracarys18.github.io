@@ -1,0 +1,21 @@
+# Generated blog posts (built from Typst sources in CI)
+posts/*.html
+
+# Typst build artifacts
+*.pdf
+posts/source/*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
