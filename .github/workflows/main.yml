@@ -18,6 +18,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install jinja2
+
+      - name: Setup Typst
+        uses: typst-community/setup-typst@v3
+
+      - name: Build Typst blogs to HTML
+        run: |
+          chmod +x scripts/build_blog.py
+          for file in posts/source/*.typ; do
+            filename=$(basename "$file" .typ)
+            python3 scripts/build_blog.py "$file" "posts/${filename}.html"
+          done
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         if: ${{ github.ref == 'refs/heads/master' }}
