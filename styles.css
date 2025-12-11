@@ -307,7 +307,42 @@ pre[class*="language-"] {
     margin: 20px 0;
 }
 
+/* Math formula blocks (plain pre/code without language class) */
+pre:not([class]) {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #f0f0f0;
+    padding: 20px 24px;
+    border-radius: 8px;
+    border: 2px solid #0f4c75;
+    overflow-x: auto;
+    font-size: 16px;
+    line-height: 1.8;
+    font-family: "Fira Code", "Courier New", monospace;
+    margin: 30px 0;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(15, 76, 117, 0.2);
+}
+
+pre:not([class]) code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+    color: inherit;
+    display: inline-block;
+}
+
 /* Inline code styling */
+code:not([class]) {
+    background: #1a1a2e;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: "Fira Code", "Courier New", monospace;
+    font-size: 14px;
+    color: #f0f0f0;
+    border: 1px solid #2a2a3e;
+}
+
 code[class*="language-"] {
     background: #1a1a1a;
     padding: 2px 6px;
