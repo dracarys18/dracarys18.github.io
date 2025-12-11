@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Build script to compile Typst blog posts to HTML using Jinja2 templating.
-Supports both HTML and SVG export modes (SVG for posts with math).
 """
 
 import re
@@ -26,60 +25,6 @@ def extract_metadata(typst_file: Path) -> dict:
         metadata[key] = value
 
     return metadata
-
-
-def has_math(typst_file: Path) -> bool:
-    """Check if Typst file contains math expressions."""
-    content = typst_file.read_text()
-    # Look for inline math ($...$) or display math ($ ... $)
-    # This is a simple heuristic - matches $ not in code blocks
-    math_pattern = r"\$[^$]+\$"
-    return bool(re.search(math_pattern, content))
-
-
-def compile_typst_to_svg(typst_file: Path, root_dir: Path) -> str:
-    """Compile Typst file to SVG and return SVG content."""
-    import shutil
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmpdir_path = Path(tmpdir)
-        svg_pattern = tmpdir_path / "output-{p}.svg"
-
-        # Compile Typst to SVG (may generate multiple pages)
-        cmd = [
-            "typst",
-            "compile",
-            "--format",
-            "svg",
-            "--root",
-            str(root_dir),
-            str(typst_file),
-            str(svg_pattern),
-        ]
-
-        result = subprocess.run(cmd, capture_output=True, text=True)
-
-        # Print warnings to stderr (they're expected)
-        if result.stderr:
-            print(result.stderr, file=sys.stderr)
-
-        if result.returncode != 0:
-            raise Exception(f"Typst SVG compilation failed: {result.stderr}")
-
-        # Collect all generated SVG files
-        svg_files = sorted(tmpdir_path.glob("output-*.svg"))
-
-        if not svg_files:
-            raise Exception("No SVG files were generated")
-
-        # Read and combine all SVG files
-        combined_svg = []
-        for svg_file in svg_files:
-            svg_content = svg_file.read_text()
-            combined_svg.append(svg_content)
-
-        # Return combined SVG with divs for each page
-        return "\n".join(combined_svg)
 
 
 def compile_typst_to_html(typst_file: Path, root_dir: Path) -> str:
@@ -136,15 +81,8 @@ def build_blog_post(
     # Extract metadata
     metadata = extract_metadata(typst_file)
 
-    # Check if post contains math
-    use_svg = has_math(typst_file)
-
-    if use_svg:
-        print(f"  Math detected - using SVG export")
-        body_content = compile_typst_to_svg(typst_file, root_dir)
-    else:
-        print(f"  No math detected - using HTML export")
-        body_content = compile_typst_to_html(typst_file, root_dir)
+    # Compile Typst to HTML
+    body_content = compile_typst_to_html(typst_file, root_dir)
 
     # Load template
     template = Template(template_file.read_text())
@@ -158,7 +96,6 @@ def build_blog_post(
         DESCRIPTION=metadata.get("description", ""),
         KEYWORDS=metadata.get("keywords", ""),
         CONTENT=body_content,
-        IS_SVG=use_svg,
     )
 
     # Write output
