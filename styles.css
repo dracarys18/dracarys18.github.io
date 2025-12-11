@@ -351,13 +351,13 @@ pre:not([class]) code {
 
 /* Inline code styling */
 code:not([class]) {
-    background: #1a1a2e;
-    padding: 3px 8px;
-    border-radius: 4px;
+    background: var(--bg-secondary);
+    padding: 2px 6px;
+    border-radius: 3px;
     font-family: "Fira Code", "Courier New", monospace;
     font-size: 14px;
-    color: #f0f0f0;
-    border: 1px solid #2a2a3e;
+    color: var(--text-primary);
+    border: none;
 }
 
 code[class*="language-"] {
