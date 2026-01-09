@@ -42,7 +42,7 @@
 
         <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://app.cal.com https://player.twitch.tv https://*.twitch.tv; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://player.twitch.tv https://app.cal.com; connect-src 'self' https://www.google-analytics.com https://app.cal.com https://*.twitch.tv;"
+            content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://app.cal.com https://player.twitch.tv; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://player.twitch.tv https://app.cal.com; connect-src 'self' https://www.google-analytics.com https://app.cal.com;"
         />
 
         <!-- Resource hints for faster third-party connections -->
@@ -184,15 +184,7 @@
             <div class="welcome">
                 <h2>I stream(Sometimes!)</h2>
             </div>
-            <div
-                id="twitch-embed"
-                style="
-                    position: relative;
-                    padding-top: 56.25%;
-                    height: 0;
-                    overflow: hidden;
-                "
-            ></div>
+            <div id="twitch-embed" class="twitch-embed-container"></div>
         </div>
 
         <div class="footer">
@@ -262,21 +254,21 @@
                     </svg>
                 </a>
                 <a
-                    href="https://twitter.com/karthihegde"
+                    href="https://bsky.app/profile/karthihegde.dev"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="social-icon"
-                    aria-label="Twitter"
+                    aria-label="Bluesky"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
+                        width="40"
+                        height="40"
+                        viewBox="0 0 1024 1024"
                         fill="#DBDBDB"
                     >
                         <path
-                            d="M22 5.8a8.5 8.5 0 0 1-2.4.7 4.2 4.2 0 0 0 1.8-2.3c-.8.5-1.7.8-2.6 1a4.1 4.1 0 0 0-7.1 3.8A11.7 11.7 0 0 1 3 4.9a4.1 4.1 0 0 0 1.3 5.6c-.7 0-1.3-.2-1.9-.5 0 1.7 1.2 3.2 2.8 3.6-.3.1-.7.1-1 .1l-.7-.1c.4 1.5 1.7 2.5 3.3 2.5A8.3 8.3 0 0 1 2 17.9a11.7 11.7 0 0 0 6.3 1.8c7.6 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"
+                            d="M351.121 315.106C416.241 363.994 486.281 463.123 512 516.315C537.719 463.123 607.759 363.994 672.879 315.106C719.866 279.83 796 252.536 796 339.388C796 356.734 786.055 485.101 780.222 505.943C759.947 578.396 686.067 596.876 620.347 585.691C735.222 605.242 764.444 670.002 701.333 734.762C581.473 857.754 529.061 703.903 515.631 664.481C513.169 657.254 512.017 653.873 512 656.748C511.983 653.873 510.831 657.254 508.369 664.481C494.939 703.903 442.527 857.754 322.667 734.762C259.556 670.002 288.778 605.242 403.653 585.691C337.933 596.876 264.053 578.396 243.778 505.943C237.945 485.101 228 356.734 228 339.388C228 252.536 304.134 279.83 351.121 315.106Z"
                         ></path>
                     </svg>
                 </a>
@@ -299,25 +291,6 @@
                         ></path>
                     </svg>
                 </a>
-                <a
-                    href="https://open.spotify.com/user/kirikkarthi"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="social-icon"
-                    aria-label="Spotify"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="#DBDBDB"
-                    >
-                        <path
-                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.65 14.52c-.2.3-.56.4-.86.2-2.35-1.44-5.3-1.76-8.78-.96-.34.08-.68-.13-.76-.47-.08-.34.13-.68.47-.76 3.8-.87 7.07-.5 9.73 1.13.3.19.4.55.2.86zm1.24-2.76c-.25.37-.7.5-1.07.25-2.7-1.66-6.8-2.14-9.98-1.17-.42.16-.86-.05-1.02-.47-.16-.41.05-.86.47-1.02 3.65-1.1 8.17-.57 11.26 1.34.37.25.5.7.25 1.07zm.1-2.85c-3.24-1.92-8.57-2.1-11.66-1.16-.5.17-1.02-.1-1.18-.6-.16-.49.1-1.02.6-1.17 3.54-1.08 9.4-.86 13.12 1.34.44.26.58.84.33 1.28-.26.43-.84.57-1.27.31z"
-                        ></path>
-                    </svg>
-                </a>
             </div>
         </div>
 
@@ -325,22 +298,28 @@
             if ("requestIdleCallback" in window) {
                 requestIdleCallback(
                     () => {
-                        const c = document.getElementById("twitch-embed");
-                        if (!c) return;
-                        const d = window.location.hostname;
+                        const container =
+                            document.getElementById("twitch-embed");
+                        if (!container) return;
+                        let hostname = window.location.hostname;
                         const load = () => {
-                            const i = document.createElement("iframe");
-                            i.src = `https://player.twitch.tv/?channel=segmentationfault18&parent=${d}`;
-                            i.style.cssText =
-                                "position:absolute;top:0;left:0;width:100%;height:100%;border:none;";
-                            i.setAttribute("allowfullscreen", "");
-                            i.setAttribute("loading", "lazy");
-                            i.setAttribute("allow", "autoplay; fullscreen");
-                            i.setAttribute(
+                            const iframe = document.createElement("iframe");
+                            iframe.src = `https://player.twitch.tv/?channel=segmentationfault18&parent=${hostname}`;
+                            iframe.width = "400";
+                            iframe.height = "225";
+                            iframe.style.cssText =
+                                "border: none; border-radius: 8px;";
+                            iframe.setAttribute("allowfullscreen", "");
+                            iframe.setAttribute("loading", "lazy");
+                            iframe.setAttribute(
+                                "allow",
+                                "autoplay; fullscreen",
+                            );
+                            iframe.setAttribute(
                                 "sandbox",
                                 "allow-scripts allow-same-origin allow-popups",
                             );
-                            c.appendChild(i);
+                            container.appendChild(iframe);
                         };
                         if ("IntersectionObserver" in window) {
                             new IntersectionObserver(
@@ -350,7 +329,7 @@
                                     }
                                 },
                                 { rootMargin: "300px" },
-                            ).observe(c);
+                            ).observe(container);
                         } else {
                             setTimeout(load, 3000);
                         }
