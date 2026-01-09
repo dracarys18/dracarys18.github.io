@@ -301,8 +301,11 @@
                         const container =
                             document.getElementById("twitch-embed");
                         if (!container) return;
-                        let hostname = window.location.hostname;
+                        const hostname = window.location.hostname;
+                        let loaded = false;
                         const load = () => {
+                            if (loaded) return;
+                            loaded = true;
                             const iframe = document.createElement("iframe");
                             iframe.src = `https://player.twitch.tv/?channel=segmentationfault18&parent=${hostname}`;
                             iframe.width = "400";
@@ -322,14 +325,16 @@
                             container.appendChild(iframe);
                         };
                         if ("IntersectionObserver" in window) {
-                            new IntersectionObserver(
+                            const observer = new IntersectionObserver(
                                 (e) => {
                                     if (e[0].isIntersecting) {
                                         load();
+                                        observer.unobserve(container);
                                     }
                                 },
                                 { rootMargin: "300px" },
-                            ).observe(container);
+                            );
+                            observer.observe(container);
                         } else {
                             setTimeout(load, 3000);
                         }
