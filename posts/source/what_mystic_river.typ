@@ -6,26 +6,8 @@
 #let description = "What mystic river teaches you about life"
 #let keywords = "Mystic River, Life, Philosophy, Butterfly Effect"
 
-#raw("<style>
-  .warning-text {
-    color: #FFD700 !important;
-    font-size: 1.8em;
-    font-weight: bold;
-    text-align: center;
-    display: block;
-    margin: 20px 0;
-  }
-  .warning-subtext {
-    color: #FFD700 !important;
-    font-size: 1.1em;
-    text-align: center;
-    display: block;
-    margin-bottom: 20px;
-  }
-</style>", lang: "html")
-
-#raw("<span class='warning-text'>⚠️ WARNING: SPOILERS AHEAD</span>", lang: "html")
-#raw("<span class='warning-subtext'>The following article contains heavy plot spoilers for the book and movie <em>Mystic River</em>.</span>", lang: "html")
+#text(fill: rgb("#FFD700"))[*⚠️ WARNING: SPOILERS AHEAD*] \
+#text(fill: rgb("#FFD700"))[_The following article contains heavy plot spoilers for the book and movie Mystic River._]
 
 ---
 
