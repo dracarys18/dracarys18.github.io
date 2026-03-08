@@ -6,18 +6,22 @@
 #let description = "What mystic river teaches you about life"
 #let keywords = "Mystic River, Life, Philosophy, Butterfly Effect"
 
-#block(
-  fill: rgb("#1a1a1a"),
-  stroke: rgb("#ffcc00"),
-  inset: 15pt,
+#rect(
+  fill: none,
+  stroke: 2pt + rgb("#FFD700"), // Golden Yellow border
+  inset: 12pt,
   radius: 4pt,
   width: 100%,
   [
-    #set text(fill: rgb("#ffcc00"), weight: "bold")
-    ⚠️ *WARNING: SPOILERS AHEAD* \
+    #set text(fill: rgb("#FFD700"), weight: "bold", size: 1.1em)
+    ⚠️ WARNING: SPOILERS AHEAD
+
+    #set text(size: 0.9em, weight: "regular")
     The following article contains heavy plot spoilers for the book and movie *Mystic River*.
   ]
 )
+
+#v(1em)
 
 // Content starts here
 *Mystic River* is one of the most famous books of the 21st Century. Written by Dennis Lehane (author of *Shutter Island*), it is one of the best psychological thrillers out there to read. The story follows three complex characters: *Dave Boyle*, a murder suspect; *Jimmy Markum*, the victim’s father; and *Celeste Boyle*, Dave’s wife.
