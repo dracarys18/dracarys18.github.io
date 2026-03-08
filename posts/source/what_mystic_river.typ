@@ -6,22 +6,12 @@
 #let description = "What mystic river teaches you about life"
 #let keywords = "Mystic River, Life, Philosophy, Butterfly Effect"
 
-#rect(
-  fill: none,
-  stroke: 2pt + rgb("#FFD700"), // Golden Yellow border
-  inset: 12pt,
-  radius: 4pt,
-  width: 100%,
-  [
-    #set text(fill: rgb("#FFD700"), weight: "bold", size: 1.1em)
-    ⚠️ WARNING: SPOILERS AHEAD
-
-    #set text(size: 0.9em, weight: "regular")
-    The following article contains heavy plot spoilers for the book and movie *Mystic River*.
-  ]
-)
-
-#v(1em)
+#raw("
+<div style='border: 2px solid #FFD700; color: #FFD700; padding: 15px; margin-bottom: 20px; border-radius: 6px; text-align: center; background-color: rgba(255, 215, 0, 0.05);'>
+  <strong style='display: block; font-size: 1.2em;'>⚠️ WARNING: SPOILERS AHEAD</strong>
+  <span style='font-size: 0.9em;'>The following article contains heavy plot spoilers for the book and movie <em>Mystic River</em>.</span>
+</div>
+", lang: "html")
 
 // Content starts here
 *Mystic River* is one of the most famous books of the 21st Century. Written by Dennis Lehane (author of *Shutter Island*), it is one of the best psychological thrillers out there to read. The story follows three complex characters: *Dave Boyle*, a murder suspect; *Jimmy Markum*, the victim’s father; and *Celeste Boyle*, Dave’s wife.
@@ -48,7 +38,7 @@ The tragedy of the book lies in the characters searching for meaning or purpose:
   caption: [Jimmy forcing Dave to admit before he kills him]
 )
 
-== Conclusion: Life moves on
+== Life moves on
 In the end, the world moves on. The sun stays up, the music plays, and the river continues to flow. There is no cosmic justice for Dave, and there is no grand epiphany for the survivors. 
 The "Butterfly Effect" that began with a car door opening thirty years ago finally reaches its end, leaving behind a wake of broken people while the rest of the world remains indifferent. We want our pain to have a purpose, but often, we are just caught in the current of a river that doesn't care where it is going.
 
