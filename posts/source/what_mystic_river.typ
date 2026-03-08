@@ -1,6 +1,6 @@
 // Metadata
 #let title = "What 'Mystic River' teaches you about life"
-#let slug = "sieve"
+#let slug = "what_mystic_river"
 #let date_display = "March 8, 2026"
 #let date_iso = "2026-03-08"
 #let description = "What mystic river teaches you about life"
