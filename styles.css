@@ -20,21 +20,21 @@ body {
     font-size: 16px;
 }
 
-dt {
+.blog_title + div + div strong:first-of-type {
     color: #FFD700 !important;
-    font-size: 2.5em !important;
-    font-weight: bold;
-    text-align: center;
+    font-size: 2em;
     display: block;
+    text-align: center;
     margin-top: 20px;
+    line-height: 1.2;
 }
 
-dd {
+.blog_title + div + div strong:first-of-type + br + em {
     color: #FFD700 !important;
-    font-size: 1.2em;
-    text-align: center;
-    margin: 10px 0 40px 0 !important;
     display: block;
+    text-align: center;
+    margin-bottom: 30px;
+    font-style: normal;
 }
 
 a {
