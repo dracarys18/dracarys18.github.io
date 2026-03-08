@@ -6,7 +6,7 @@
 #let description = "What mystic river teaches you about life"
 #let keywords = "Mystic River, Life, Philosophy, Butterfly Effect"
 
-#raw("<p style='color: #FFD700 !important; font-size: 2em; font-weight: bold; text-align: center;'>⚠️ WARNING: SPOILERS AHEAD</p>", lang: "html")
+/ WARNING: SPOILERS AHEAD: The following article contains heavy plot spoilers for the book and movie _Mystic River_.
 
 ---
 // Content starts here

@@ -20,6 +20,23 @@ body {
     font-size: 16px;
 }
 
+dt {
+    color: #FFD700 !important;
+    font-size: 2.5em !important;
+    font-weight: bold;
+    text-align: center;
+    display: block;
+    margin-top: 20px;
+}
+
+dd {
+    color: #FFD700 !important;
+    font-size: 1.2em;
+    text-align: center;
+    margin: 10px 0 40px 0 !important;
+    display: block;
+}
+
 a {
     color: var(--text-primary);
     text-decoration: none;
