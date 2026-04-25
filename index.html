@@ -42,13 +42,13 @@
 
         <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://app.cal.com https://player.twitch.tv; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://player.twitch.tv https://app.cal.com; connect-src 'self' https://www.google-analytics.com https://app.cal.com;"
+            content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://app.cal.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://www.youtube.com https://app.cal.com; connect-src 'self' https://www.google-analytics.com https://app.cal.com;"
         />
 
         <!-- Resource hints for faster third-party connections -->
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://app.cal.com" />
-        <link rel="dns-prefetch" href="https://player.twitch.tv" />
+        <link rel="dns-prefetch" href="https://www.youtube.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
@@ -184,7 +184,7 @@
             <div class="welcome">
                 <h2>I stream(Sometimes!)</h2>
             </div>
-            <div id="twitch-embed" class="twitch-embed-container"></div>
+            <div id="youtube-embed" class="twitch-embed-container"></div>
         </div>
 
         <div class="footer">
@@ -299,15 +299,14 @@
                 requestIdleCallback(
                     () => {
                         const container =
-                            document.getElementById("twitch-embed");
+                            document.getElementById("youtube-embed");
                         if (!container) return;
-                        const hostname = window.location.hostname;
                         let loaded = false;
                         const load = () => {
                             if (loaded) return;
                             loaded = true;
                             const iframe = document.createElement("iframe");
-                            iframe.src = `https://player.twitch.tv/?channel=segmentationfault18&parent=${hostname}`;
+                            iframe.src = "https://www.youtube.com/embed/live_stream?channel=UCla5qk3rzi559glRxLgRMKA";
                             iframe.width = "400";
                             iframe.height = "225";
                             iframe.style.cssText =
