@@ -1,0 +1,14 @@
+{
+    "name": "karthihegde-website",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "description": "Static site for karthihegde.dev",
+    "scripts": {
+        "build": "node scripts/build-blog.mjs"
+    },
+    "dependencies": {
+        "satteri": "^0.10.5",
+        "yaml": "^2.9.1"
+    }
+}

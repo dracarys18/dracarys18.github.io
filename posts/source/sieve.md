@@ -1,19 +1,18 @@
-// Metadata
-#let title = "SIEVE: An Efficient Cache Eviction"
-#let slug = "sieve"
-#let date_display = "September 6, 2025"
-#let date_iso = "2025-09-06"
-#let description = "Deep dive into SIEVE cache eviction algorithm, comparing it with LRU and exploring its implementation. Understanding modern caching strategies."
-#let keywords = "SIEVE, Cache Eviction, LRU, Caching Algorithms, Computer Science, Systems Programming"
-
-// Content starts here
+---
+title: "SIEVE: An Efficient Cache Eviction"
+slug: "sieve"
+date_display: "September 6, 2025"
+date_iso: "2025-09-06"
+description: "Deep dive into SIEVE cache eviction algorithm, comparing it with LRU and exploring its implementation. Understanding modern caching strategies."
+keywords: "SIEVE, Cache Eviction, LRU, Caching Algorithms, Computer Science, Systems Programming"
+---
 
 As we approach the 26th anniversary of the 21st century, hardware continues to get cheaper and more powerful. Data centers now operate with terabytes of RAM, a scale that would have been unimaginable not long ago. Yet, as the old saying goes, Memory is never truly infinite.
 
-#figure(
-  image("../assets/the_cloud.png", width: 80%),
-  caption: [The Cloud]
-)
+<figure>
+  <img src="assets/the_cloud.png" alt="The Cloud" style="width: 80%">
+  <figcaption>Figure 1: The Cloud</figcaption>
+</figure>
 
 Cache eviction algorithms have evolved a lot, and there's no single strategy that fits every need. That's why we've ended up with so many of them.
 
@@ -48,7 +47,7 @@ pub fn Cache(comptime K: type, comptime V: type) type {
 
 This is our basic cache object. Internally, it uses a doubly linked list to keep track of which element should be evicted next. Alongside that, we maintain a `size` to enforce capacity limits, and a `ttl` (time-to-live) attribute so entries can expire automatically after a certain duration.
 
-== Insert
+## Insert
 
 Now with that settled, let's walk through what actually happens when we insert an object into the cache. This is where the behavior of SIEVE starts to look different from the traditional LRU approach. In LRU, every insert pushes the item to the back of the queue so it's treated as the most recently used. SIEVE, on the other hand, takes a lighter path—placing items at the front and marking them with a simple `visited` flag. This small change is what gives SIEVE its efficiency later when it comes time to evict entries.
 
@@ -102,7 +101,7 @@ pub inline fn insert(
 }
 ```
 
-== Lookup
+## Lookup
 
 Now that we've covered how inserts work, let's move on to lookups—the `get` operation. After all, the whole point of a cache is to serve as many requests as possible from memory, which means aiming for more cache hits and fewer misses.
 
@@ -140,7 +139,7 @@ pub inline fn get(
 }
 ```
 
-== Eviction
+## Eviction
 
 Now that we understand how lookups work, let's move on to eviction. We've already touched on the idea of how items are chosen to be removed, but now it's time to look at the actual mechanics of how eviction is carried out.
 
@@ -172,19 +171,19 @@ Now that we understand how lookups work, let's move on to eviction. We've alread
 
 Eviction is basically the moment when the cache decides who gets to stay and who has to go. In LRU, it's simple — the item that's been ignored the longest (sitting at the front of the queue) gets evicted. SIEVE handles this a little differently. It looks at the item at the front: if it's been marked as `visited`, the cache clears that mark and gives the item another chance by moving it to the back. If it hasn't been touched in a while, it's shown the door. This way, things you actually use tend to stick around, and the stale stuff slowly makes its way out.
 
-#figure(
-  image("../assets/sieve_diagram.gif", width: 80%),
-  caption: [How does SIEVE work (Credits: #link("https://cachemon.github.io/SIEVE-website/")[Cachemon])]
-)
+<figure>
+  <img src="assets/sieve_diagram.gif" alt="How does SIEVE work" style="width: 80%">
+  <figcaption>Figure 2: How does SIEVE work (Credits: <a href="https://cachemon.github.io/SIEVE-website/">Cachemon</a>)</figcaption>
+</figure>
 
-== Takeaways
+## Takeaways
 
 Well that's a wrap! If this stuff got you curious, I'll drop a link to the full repo below. Honestly, the most fun part of writing this wasn't typing out the blog—it was building SIEVE myself and seeing it click. I really believe the best way to learn is by rolling up your sleeves and trying it out. It scratches that curiosity itch in a way just reading never does.
 
 Oh also I am new to zig so if you are angry at how I wrote the code, I totally understand :p
 
-== References
+## References
 
-- #link("https://cachemon.github.io/SIEVE-website/")[Cachemon]
-- #link("https://junchengyang.com/publication/nsdi24-SIEVE.pdf")[SIEVE: CMU Paper (NSDI 2024)]
-- #link("https://github.com/dracarys18/cerca")[Cerca Repository (My full implementation)]
+- [Cachemon](https://cachemon.github.io/SIEVE-website/)
+- [SIEVE: CMU Paper (NSDI 2024)](https://junchengyang.com/publication/nsdi24-SIEVE.pdf)
+- [Cerca Repository (My full implementation)](https://github.com/dracarys18/cerca)

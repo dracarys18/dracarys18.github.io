@@ -1,14 +1,10 @@
-# Generated blog posts (built from Typst sources in CI)
+# Generated blog posts (built from Markdown sources in CI)
 posts/*.html
 
-# Typst build artifacts
-*.pdf
-posts/source/*.pdf
+# Node
+node_modules/
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
+*.pdf
 
 # OS
 .DS_Store
