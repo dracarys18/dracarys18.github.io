@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Blog Posts - Karthikey Hegde</title>
+        <meta
+            name="description"
+            content="Technical blog posts on distributed systems, databases, cache eviction algorithms, and self-hosting by Karthikey Hegde."
+        />
+        <meta
+            name="keywords"
+            content="Technical Blog, Distributed Systems, Databases, HyperLogLog, SIEVE Cache, Self-Hosting, Homelab"
+        />
+        <meta name="author" content="Karthikey Hegde" />
+
+        <meta property="og:title" content="Blog Posts - Karthikey Hegde" />
+        <meta
+            property="og:description"
+            content="Technical blog posts on distributed systems, databases, and systems programming."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://karthihegde.dev/posts" />
+        <meta property="og:site_name" content="Karthikey Hegde" />
+
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@karthihegde" />
+        <meta name="twitter:creator" content="@karthihegde" />
+        <meta name="twitter:title" content="Blog Posts - Karthikey Hegde" />
+        <meta
+            name="twitter:description"
+            content="Technical blog posts on distributed systems, databases, and systems programming."
+        />
+
+        <link rel="canonical" href="https://karthihegde.dev/posts" />
+
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://app.cal.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://app.cal.com; connect-src 'self' https://www.google-analytics.com https://app.cal.com;"
+        />
+
+        <!-- Resource hints for faster third-party connections -->
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://app.cal.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+        <style>
+            :root {
+                --bg-primary: #000;
+                --bg-secondary: #111111;
+                --text-primary: #dbdbdb;
+                --text-secondary: #888;
+                --border-color: #444;
+                --border-light: #333;
+                --hover-bg: #333;
+                --max-width: 800px;
+            }
+            body {
+                background-color: var(--bg-primary);
+                color: var(--text-primary);
+                font-family: "Source Code Pro", monospace;
+                line-height: 1.6;
+                max-width: var(--max-width);
+                margin: 0 auto;
+                padding: 20px;
+                font-size: 16px;
+            }
+            a {
+                color: var(--text-primary);
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+            .header,
+            .footer {
+                border-top: 1px dashed var(--border-color);
+                border-bottom: 1px dashed var(--border-color);
+                padding: 10px 0;
+                margin: 20px 0;
+                text-align: right;
+                overflow: hidden;
+            }
+            .nav-link {
+                margin-left: 10px;
+            }
+            .content {
+                margin: 30px 0;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+            }
+        </style>
+
+        <link
+            rel="preload"
+            as="style"
+            href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;800&display=swap"
+        />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;800&display=swap"
+            media="print"
+            onload="this.media='all'"
+        />
+
+        <link
+            rel="preload"
+            href="styles.css"
+            as="style"
+            onload="this.onload=null;this.rel='stylesheet'"
+        />
+        <noscript><link rel="stylesheet" href="styles.css" /></noscript>
+
+        <!-- Google Analytics - async loading -->
+        <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-QMCKX3D5N7"
+        ></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", "G-QMCKX3D5N7");
+        </script>
+    </head>
+    <body>
+        <div class="header">
+            <nav>
+                <a href="/" class="nav-link">/ karthihegde</a>
+                <a href="contact" class="nav-link">/ contact</a>
+                <a href="posts" class="nav-link">/ posts</a>
+            </nav>
+        </div>
+        <div class="content">
+            <h2>Posts</h2>
+            <ul class="post-list">
+{{POST_LIST}}
+            </ul>
+        </div>
+        <div class="footer">
+            <div class="social-links">
+                <a
+                    href="#"
+                    class="social-icon"
+                    aria-label="Schedule a call"
+                    data-cal-link="karthihegde/15min"
+                    data-cal-namespace="15min"
+                    data-cal-config='{"layout":"month_view","theme":"dark"}'
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="#DBDBDB"
+                    >
+                        <path
+                            d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"
+                        />
+                        <rect x="7" y="12" width="2" height="2" />
+                        <rect x="11" y="12" width="2" height="2" />
+                        <rect x="15" y="12" width="2" height="2" />
+                        <rect x="7" y="16" width="2" height="2" />
+                        <rect x="11" y="16" width="2" height="2" />
+                        <rect x="15" y="16" width="2" height="2" />
+                    </svg>
+                </a>
+                <a
+                    href="https://linkedin.com/in/karthihegde010"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="social-icon"
+                    aria-label="LinkedIn"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="#DBDBDB"
+                    >
+                        <path
+                            d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"
+                        ></path>
+                    </svg>
+                </a>
+                <a
+                    href="https://github.com/dracarys18"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="social-icon"
+                    aria-label="GitHub"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                    >
+                        <path
+                            d="M12 0a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2 0 1.9 1.2 1.9 1.2 1 1.8 2.8 1.3 3.4 1 .1-.8.4-1.3.8-1.6-2.8-.3-5.6-1.3-5.6-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6 0-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8 0 3.2.9.8 1.3 1.9 1.3 3.2 0 4.6-2.9 5.6-5.6 5.9.5.4.9 1.1.9 2.3v3.3c0 .3.1.7.8.6A12 12 0 0 0 12 0"
+                        ></path>
+                    </svg>
+                </a>
+                <a
+                    href="https://x.com/karthihegde"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="social-icon"
+                    aria-label="X"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="#DBDBDB"
+                    >
+                        <path
+                            d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"
+                        ></path>
+                    </svg>
+                </a>
+                <a
+                    href="mailto:me@karthihegde.dev"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="social-icon"
+                    aria-label="Email"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="#DBDBDB"
+                    >
+                        <path
+                            d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                        ></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <script src="js/cal-init.js" defer></script>
+    </body>
+</html>
