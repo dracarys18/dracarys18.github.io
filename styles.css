@@ -12,7 +12,8 @@
 body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    font-family: "Source Code Pro", monospace;
+    font-family:
+        "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     line-height: 1.6;
     max-width: var(--max-width);
     margin: 0 auto;
@@ -100,7 +101,7 @@ blockquote {
     border-radius: 8px;
     text-align: center;
     font-size: 18px;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family: "Fira Code", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     color: var(--text-primary);
     max-width: 90%;
     overflow-x: auto;
@@ -368,7 +369,7 @@ pre[class*="language-"] {
     overflow-x: auto;
     font-size: 14px;
     line-height: 1.6;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family: "Fira Code", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     margin: 20px 0;
 }
 
@@ -378,7 +379,7 @@ pre code[data-lang] {
     color: var(--text-primary);
     padding: 0;
     display: block;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family: "Fira Code", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 14px;
     line-height: 1.6;
 }
@@ -413,7 +414,7 @@ pre:not([class]):not(:has(code[data-lang])) {
     overflow-x: auto;
     font-size: 16px;
     line-height: 1.8;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family: "Fira Code", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     margin: 30px 0;
     text-align: center;
 }
@@ -432,7 +433,7 @@ code:not([class]) {
     background: var(--bg-secondary);
     padding: 2px 6px;
     border-radius: 3px;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family: "Fira Code", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 14px;
     color: var(--text-primary);
     border: none;
@@ -442,7 +443,7 @@ code[class*="language-"] {
     background: #1a1a1a;
     padding: 2px 6px;
     border-radius: 4px;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family: "Fira Code", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 14px;
 }
 
@@ -492,7 +493,7 @@ code[class*="language-"] {
     border-radius: 8px;
     text-align: center;
     font-size: 18px;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family: "Fira Code", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     color: var(--text-primary);
     max-width: 90%;
     overflow-x: auto;
