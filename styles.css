@@ -119,6 +119,28 @@ figcaption {
     font-style: italic;
 }
 
+.image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 30px 0;
+}
+
+.image-grid img {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+}
+
+@media (max-width: 500px) {
+    .image-grid img {
+        flex-basis: 100%;
+    }
+}
+
 .post-list {
     list-style-type: none;
     padding: 0;

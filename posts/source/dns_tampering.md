@@ -1,4 +1,11 @@
-# So my ISP was hijacking my DNS
+---
+title: "So my ISP was hijacking my DNS"
+slug: "dns_tampering"
+date_display: "November 3, 2026"
+date_iso: "2026-11-03"
+description: "My ISP was tampering with my DNS queries and handing back bogus IP addresses. Here are the misconceptions about DoH, DoT and DNSSEC that followed, and the setup I actually run."
+keywords: "DNS, DoH, DoT, DNSSEC, DNS Tampering, ISP Censorship, AdGuard, dnscrypt-proxy, Self-hosting"
+---
 
 It was just a boring Saturday afternoon, and I thought I'd fix some of the problems with my homelab. One of those problems was that an external site my Podman container was trying to talk to just wasn't working.
 
@@ -8,10 +15,10 @@ I kept getting "Site cannot be reached" almost immediately. This made me suspect
 
 I took the IP I got from the first DNS resolution and tried to look up who owned it. Lo and behold, it was my goddamn ISP. That's when I realised my ISP was hijacking my DNS queries and returning a tampered IP address.
 
-<div style="display: flex; gap: 10px;">
-  <img src="../assets/dns/plaintext_dns.png" width="49%">
-  <img src="../assets/dns/encrypted_dns.png" width="49%">
-  <img src="../assets/dns/ip_info.png" width="49%">
+<div class="image-grid">
+  <img src="assets/dns/plaintext_dns.png" alt="A plaintext DNS query returning my ISP's IP address" loading="lazy">
+  <img src="assets/dns/encrypted_dns.png" alt="The same query over Cloudflare's DoH endpoint returning the real IP address" loading="lazy">
+  <img src="assets/dns/ip_info.png" alt="IP ownership lookup showing the tampered address belongs to my ISP" loading="lazy">
 </div>
 
 Well, the obvious answer was DoT (DNS over TLS) or DoH (DNS over HTTPS). [I made a tweet about this, and it somehow blew up](https://x.com/karthihegde/status/2116533888025874611).
@@ -28,7 +35,7 @@ Now here's the catch. DNS resolution doesn't happen over a single connection. Yo
 
 But you can also configure a [forward-zone](https://unbound.docs.nlnetlabs.nl/en/latest/manpages/unbound.conf.html#forward-zone-options) in Unbound. Instead of resolving DNS queries itself, Unbound can forward them to another DNS resolver. And if that resolver supports DoT, the connection to it is encrypted, which means your ISP can't casually snoop on or tamper with your DNS queries in transit.
 
-## Just use DNSSec
+## Just use DNSSEC
 
 It's understandable why someone would assume DNSSEC is what protects them here. I mean, it has DNS and Security right in the name. And in a way, it does, but it works through verification, not encryption.
 
