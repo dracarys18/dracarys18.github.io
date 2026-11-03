@@ -7,12 +7,15 @@
     --border-light: #333;
     --hover-bg: #333;
     --max-width: 800px;
+    --link: #6cb6ff;
+    --link-hover: #9dd0ff;
 }
 
 body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    font-family: "Source Code Pro", monospace;
+    font-family:
+        "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     line-height: 1.6;
     max-width: var(--max-width);
     margin: 0 auto;
@@ -44,6 +47,24 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+/* Inline links inside article prose */
+.post-body a {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+}
+
+.post-body a:hover {
+    color: var(--link-hover);
+    text-decoration-thickness: 2px;
+}
+
+.post-body a:focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 2px;
 }
 
 .header,
@@ -100,7 +121,8 @@ blockquote {
     border-radius: 8px;
     text-align: center;
     font-size: 18px;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family:
+        "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     color: var(--text-primary);
     max-width: 90%;
     overflow-x: auto;
@@ -117,6 +139,51 @@ figcaption {
     font-size: 14px;
     margin-top: 10px;
     font-style: italic;
+}
+
+/* Article prose: proportional for long-form reading, mono stays for chrome and code */
+.post-body {
+    font-family:
+        "Atkinson Hyperlegible", Georgia, system-ui, -apple-system, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+.post-body > p,
+.post-body > ul,
+.post-body > ol,
+.post-body > h2,
+.post-body > h3 {
+    max-width: 68ch;
+}
+
+.post-body h2,
+.post-body h3,
+.post-body h4 {
+    font-family:
+        "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.image-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 30px 0;
+}
+
+.image-grid img {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+}
+
+@media (max-width: 500px) {
+    .image-grid img {
+        flex-basis: 100%;
+    }
 }
 
 .post-list {
@@ -346,7 +413,8 @@ pre[class*="language-"] {
     overflow-x: auto;
     font-size: 14px;
     line-height: 1.6;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family:
+        "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     margin: 20px 0;
 }
 
@@ -356,7 +424,8 @@ pre code[data-lang] {
     color: var(--text-primary);
     padding: 0;
     display: block;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family:
+        "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 14px;
     line-height: 1.6;
 }
@@ -391,7 +460,8 @@ pre:not([class]):not(:has(code[data-lang])) {
     overflow-x: auto;
     font-size: 16px;
     line-height: 1.8;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family:
+        "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     margin: 30px 0;
     text-align: center;
 }
@@ -410,7 +480,8 @@ code:not([class]) {
     background: var(--bg-secondary);
     padding: 2px 6px;
     border-radius: 3px;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family:
+        "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 14px;
     color: var(--text-primary);
     border: none;
@@ -420,7 +491,8 @@ code[class*="language-"] {
     background: #1a1a1a;
     padding: 2px 6px;
     border-radius: 4px;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family:
+        "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 14px;
 }
 
@@ -470,7 +542,8 @@ code[class*="language-"] {
     border-radius: 8px;
     text-align: center;
     font-size: 18px;
-    font-family: "Fira Code", "Courier New", monospace;
+    font-family:
+        "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     color: var(--text-primary);
     max-width: 90%;
     overflow-x: auto;

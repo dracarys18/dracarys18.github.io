@@ -3,6 +3,7 @@
  * Build script to compile Markdown blog posts to HTML with Sätteri.
  */
 
+import { createHash } from "node:crypto";
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -12,6 +13,8 @@ import { parse as parseYaml } from "yaml";
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourceDir = path.join(rootDir, "posts", "source");
 const templatesDir = path.join(rootDir, "templates");
+
+const STYLESHEET = /((?:\.\.\/)*)styles\.css(?:\?v=[0-9a-f]+)?/g;
 
 const escapeHtml = (value) =>
     String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -121,6 +124,34 @@ async function buildIndex(posts, template) {
     console.log(`  → ${outputFile}`);
 }
 
+async function stampStylesheet() {
+    const hash = createHash("sha256")
+        .update(await readFile(path.join(rootDir, "styles.css")))
+        .digest("hex")
+        .slice(0, 10);
+
+    const postsDir = path.join(rootDir, "posts");
+    const pages = [
+        path.join(rootDir, "index.html"),
+        path.join(rootDir, "contact.html"),
+        path.join(rootDir, "posts.html"),
+        ...(await readdir(postsDir))
+            .filter((file) => file.endsWith(".html"))
+            .map((file) => path.join(postsDir, file)),
+    ];
+
+    for (const page of pages) {
+        const source = await readFile(page, "utf8");
+        const stamped = source.replace(
+            STYLESHEET,
+            (_match, prefix) => `${prefix}styles.css?v=${hash}`,
+        );
+        if (stamped !== source) await writeFile(page, stamped);
+    }
+
+    console.log(`Stamped stylesheet links as styles.css?v=${hash}`);
+}
+
 async function main() {
     const postTemplate = await readFile(path.join(templatesDir, "blog-post.html"), "utf8");
     const indexTemplate = await readFile(path.join(templatesDir, "posts-index.html"), "utf8");
@@ -137,6 +168,7 @@ async function main() {
     }
 
     await buildIndex(posts, indexTemplate);
+    await stampStylesheet();
 }
 
 await main();
