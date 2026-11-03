@@ -7,6 +7,8 @@
     --border-light: #333;
     --hover-bg: #333;
     --max-width: 800px;
+    --link: #6cb6ff;
+    --link-hover: #9dd0ff;
 }
 
 body {
@@ -45,6 +47,24 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+/* Inline links inside article prose */
+.post-body a {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+}
+
+.post-body a:hover {
+    color: var(--link-hover);
+    text-decoration-thickness: 2px;
+}
+
+.post-body a:focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 2px;
 }
 
 .header,
