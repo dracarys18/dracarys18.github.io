@@ -27,8 +27,8 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Source+Code+Pro:wght@400;800&display=swap">
-    <link rel="stylesheet" href="../styles.css?v=828d95296e">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fira+Code:wght@400;500&family=Source+Code+Pro:wght@400;800&display=swap">
+    <link rel="stylesheet" href="../styles.css?v=33d05fc507">
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-QMCKX3D5N7"></script>
     <script>
@@ -52,7 +52,8 @@
     <div style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 14px;">
         Published on November 3, 2026
     </div>
-    <p>It was just a boring Saturday afternoon, and I thought I'd fix some of the problems with my homelab. One of those problems was that an external site my Podman container was trying to talk to just wasn't working.</p>
+    <div class="post-body">
+<p>It was just a boring Saturday afternoon, and I thought I'd fix some of the problems with my homelab. One of those problems was that an external site my Podman container was trying to talk to just wasn't working.</p>
 <p>I kept getting "Site cannot be reached" almost immediately. This made me suspect something was wrong with my DNS setup, so I started doing a <code>dig</code> on the domain. I tried different providers, Google DNS, Cloudflare, pretty much everyone. Almost all of them returned the same IP address. But as soon as I tried Cloudflare's DoH endpoint, I got a completely different IP address.</p>
 <p>"Huh?" was my exact reaction.</p>
 <p>I took the IP I got from the first DNS resolution and tried to look up who owned it. Lo and behold, it was my goddamn ISP. That's when I realised my ISP was hijacking my DNS queries and returning a tampered IP address.</p>
@@ -84,5 +85,6 @@
 <p>Right now, I use AdGuard for my DNS, with <code>dnscrypt-proxy</code> handling the upstream DNS queries over DNSCrypt, so my DNS traffic is encrypted in transit. For containers where I really can't afford DNS failures, I also have Cloudflare configured as a fallback. My local AdGuard is still the primary DNS for them, though.</p>
 <p>I also run NixOS on my servers, and my <a href="https://github.com/dracarys18/dotfiles">dotfiles</a> are open source if you're interested</p>
 
+    </div>
 </body>
 </html>

@@ -120,6 +120,29 @@ figcaption {
     font-style: italic;
 }
 
+/* Article prose: proportional for long-form reading, mono stays for chrome and code */
+.post-body {
+    font-family:
+        "Atkinson Hyperlegible", Georgia, system-ui, -apple-system, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+.post-body > p,
+.post-body > ul,
+.post-body > ol,
+.post-body > h2,
+.post-body > h3 {
+    max-width: 68ch;
+}
+
+.post-body h2,
+.post-body h3,
+.post-body h4 {
+    font-family:
+        "Source Code Pro", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
 .image-grid {
     display: flex;
     flex-wrap: wrap;
