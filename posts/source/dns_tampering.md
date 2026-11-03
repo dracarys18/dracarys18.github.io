@@ -49,11 +49,11 @@ If a tampered response fails DNSSEC validation, your resolver will return SERVFA
 And yes, this is true. DoT and DoH rely on you trusting the DNS resolver you're sending your queries to. They encrypt the connection, so your ISP can't casually snoop on or tamper with your DNS traffic in transit. But that doesn't mean the resolver itself can't mess with your responses. You're still putting your trust in whoever runs that DNS server.
 
 ## Your ISP can snoop on the sites regardless
-Indeed. But the problem here wasn't them snooping on me. It was them potentially censoring me and blocking access to something in bad faith.
+Indeed. Although your regular internet traffic is encrypted with TLS, your ISP can see the hostname during the TLS handshake (SNI). They can also figure out which site you're visiting just from the destination IP sometimes.
 
-Also, I tunnel my traffic through Mullvad anyway, so they probably can't snoop on my browsing activity anyway. But that's a story for another day.
+Unless, of course, you tunnel your traffic through a VPN. I use Mullvad through Tailscale's exit node feature.
 
-
+Of course, this just shifts some of the trust to your VPN provider. But that's a story for another day.
 ## So what does my setup look like?
 
 I've been using Pi-hole/AdGuard for over 3 years now. That's actually what got me into self-hosting in the first place.
