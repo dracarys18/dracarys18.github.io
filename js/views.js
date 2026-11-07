@@ -7,7 +7,7 @@
         element.hidden = true;
     };
 
-    const render = (element, views, fill) => {
+    const render = (element, views) => {
         if (!views) {
             hide(element);
             return;
@@ -25,22 +25,7 @@
         label.className = "views-label";
         label.textContent = views === 1 ? "view" : "views";
 
-        const children = [dot, value, label];
-
-        if (fill !== undefined) {
-            const track = document.createElement("span");
-            track.className = "views-track";
-            track.setAttribute("aria-hidden", "true");
-
-            const bar = document.createElement("span");
-            bar.className = "views-fill";
-            bar.style.setProperty("--fill", `${fill}%`);
-
-            track.append(bar);
-            children.push(track);
-        }
-
-        element.replaceChildren(...children);
+        element.replaceChildren(dot, value, label);
         element.hidden = false;
     };
 
@@ -59,23 +44,11 @@
 
     if (slugs.length) {
         getJson(`/views?slugs=${encodeURIComponent(slugs.join(","))}`)
-            .then(({ views }) => {
-                const counts = listTargets.map(
-                    (el) => views[el.dataset.slug] ?? 0,
-                );
-                const busiest = Math.max(...counts, 0);
-
-                // Log scale keeps low-traffic posts visible next to a viral one.
-                const scale = Math.log1p(busiest);
-
-                listTargets.forEach((el, index) => {
-                    const count = counts[index];
-                    const fill = scale
-                        ? Math.max(8, Math.round((Math.log1p(count) / scale) * 100))
-                        : 0;
-                    render(el, count, fill);
-                });
-            })
+            .then(({ views }) =>
+                listTargets.forEach((el) =>
+                    render(el, views[el.dataset.slug] ?? 0),
+                ),
+            )
             .catch(() => listTargets.forEach(hide));
     }
 
