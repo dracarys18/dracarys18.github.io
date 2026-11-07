@@ -79,12 +79,41 @@
             .catch(() => listTargets.forEach(hide));
     }
 
+    // A reader counts once per article per day, so reloading does not inflate it.
+    const VIEW_TTL_MS = 24 * 60 * 60 * 1000;
+    const storageKey = (slug) => `viewed:${slug}`;
+
+    const alreadyViewed = (slug) => {
+        try {
+            const seen = Number(localStorage.getItem(storageKey(slug)));
+            return Number.isFinite(seen) && Date.now() - seen < VIEW_TTL_MS;
+        } catch {
+            return false;
+        }
+    };
+
+    const markViewed = (slug) => {
+        try {
+            localStorage.setItem(storageKey(slug), String(Date.now()));
+        } catch {
+            // private mode or storage disabled: the server throttle still applies
+        }
+    };
+
     counterTargets.forEach((element) => {
-        if (!element.dataset.slug) return;
-        getJson(`/views/${encodeURIComponent(element.dataset.slug)}`, {
-            method: "POST",
-        })
-            .then(({ views }) => render(element, views))
+        const slug = element.dataset.slug;
+        if (!slug) return;
+
+        const counted = !alreadyViewed(slug);
+
+        getJson(
+            `/views/${encodeURIComponent(slug)}`,
+            counted ? { method: "POST" } : {},
+        )
+            .then(({ views }) => {
+                if (counted) markViewed(slug);
+                render(element, views);
+            })
             .catch(() => hide(element));
     });
 })();

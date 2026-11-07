@@ -32,12 +32,14 @@ export class ViewCounter {
         this.state = state;
         this.env = env;
         this.counts = new Map();
-        this.seen = new Map();
 
         this.state.blockConcurrencyWhile(async () => {
             const sql = this.state.storage.sql;
             sql.exec(
                 "CREATE TABLE IF NOT EXISTS counts (slug TEXT PRIMARY KEY, views INTEGER NOT NULL DEFAULT 0)",
+            );
+            sql.exec(
+                "CREATE TABLE IF NOT EXISTS seen (slug TEXT NOT NULL, ip TEXT NOT NULL, until INTEGER NOT NULL, PRIMARY KEY (slug, ip))",
             );
 
             for (const row of sql.exec("SELECT slug, views FROM counts").toArray()) {
@@ -71,21 +73,37 @@ export class ViewCounter {
         );
     }
 
+    // The window lives in SQLite, not memory: the object hibernates between
+    // visits on a quiet blog, and an in-memory map would forget it.
     throttled(slug, ip) {
-        const key = `${slug}:${ip}`;
+        const sql = this.state.storage.sql;
         const now = Date.now();
-        const until = this.seen.get(key);
+        const row = sql
+            .exec("SELECT until FROM seen WHERE slug = ? AND ip = ?", slug, ip)
+            .toArray()[0];
 
-        if (until && until > now) return true;
-        this.seen.set(key, now + VIEW_WINDOW_MS);
+        if (row && row.until > now) return true;
 
-        if (this.seen.size > 5000) {
-            for (const [seenKey, expiry] of this.seen) {
-                if (expiry <= now) this.seen.delete(seenKey);
-            }
-        }
+        sql.exec(
+            "INSERT INTO seen (slug, ip, until) VALUES (?, ?, ?) ON CONFLICT(slug, ip) DO UPDATE SET until = excluded.until",
+            slug,
+            ip,
+            now + VIEW_WINDOW_MS,
+        );
+
+        this.pruneSeen(now);
 
         return false;
+    }
+
+    pruneSeen(now) {
+        this.increments = (this.increments ?? 0) + 1;
+        if (this.increments % 500 !== 0) return;
+
+        this.state.storage.sql.exec(
+            "DELETE FROM seen WHERE rowid IN (SELECT rowid FROM seen WHERE until < ? LIMIT 200)",
+            now,
+        );
     }
 
     async fetch(request) {
