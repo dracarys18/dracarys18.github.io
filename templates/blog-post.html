@@ -23,6 +23,7 @@
     <meta name="twitter:description" content="{{DESCRIPTION}}">
 
     <link rel="canonical" href="https://karthihegde.dev/posts/{{SLUG}}">
+    <link rel="alternate" type="application/rss+xml" title="Karthikey Hegde" href="/feed.xml">
     <link rel="preconnect" href="https://www.googletagmanager.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,9 +52,12 @@
     <div class="blog_title">{{TITLE}}</div>
     <div style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 14px;">
         Published on {{DATE_DISPLAY}}
+        <span class="views" data-views="count" data-slug="{{SLUG}}" hidden></span>
     </div>
     <div class="post-body">
 {{CONTENT}}
     </div>
+
+    <script src="../js/views.js" defer></script>
 </body>
 </html>

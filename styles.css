@@ -195,6 +195,14 @@ figcaption {
     margin-bottom: 10px;
     display: flex;
     flex-wrap: wrap;
+    align-items: baseline;
+}
+
+.views {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-left: 8px;
+    white-space: nowrap;
 }
 
 .date {

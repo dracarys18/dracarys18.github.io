@@ -24,6 +24,26 @@ const escapeAttribute = (value) => escapeHtml(value).replace(/"/g, "&quot;");
 const fillTemplate = (template, values) =>
     template.replace(/\{\{(\w+)\}\}/g, (_match, key) => values[key] ?? "");
 
+const SITE_URL = "https://karthihegde.dev";
+
+const xml = (value) =>
+    String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+
+// Feed readers see the HTML out of context, so relative asset URLs must be absolute
+const absolutize = (html) =>
+    html.replace(
+        /(src|href)="(?!https?:|mailto:|#|\/\/)([^"]+)"/g,
+        (_match, attr, url) => `${attr}="${SITE_URL}/posts/${url}"`,
+    );
+
+const cdata = (html) => `<![CDATA[${html.split("]]>").join("]]]]><![CDATA[>")}]]>`;
+
+const rfc822 = (isoDate) => new Date(`${isoDate}T00:00:00Z`).toUTCString();
+
 async function renderMarkdown(file) {
     const source = await readFile(file, "utf8");
 
@@ -62,7 +82,64 @@ async function buildPost(file, template) {
     console.log(`Building ${path.basename(file)}...`);
     console.log(`  → ${outputFile}`);
 
-    return { ...metadata, name };
+    return { ...metadata, name, html };
+}
+
+const feedCategories = (keywords) =>
+    String(keywords ?? "")
+        .split(",")
+        .map((keyword) => keyword.trim())
+        .filter(Boolean)
+        .map((keyword) => `            <category>${xml(keyword)}</category>`);
+
+function feedItem(post) {
+    const link = `${SITE_URL}/posts/${post.name}`;
+
+    return [
+        "        <item>",
+        `            <title>${xml(post.title ?? post.name)}</title>`,
+        `            <link>${xml(link)}</link>`,
+        `            <guid isPermaLink="true">${xml(link)}</guid>`,
+        `            <pubDate>${rfc822(post.date_iso)}</pubDate>`,
+        ...feedCategories(post.keywords),
+        `            <description>${xml(post.description ?? "")}</description>`,
+        `            <content:encoded>${cdata(absolutize(post.html))}</content:encoded>`,
+        "        </item>",
+    ].join("\n");
+}
+
+async function buildFeed(posts) {
+    const published = posts
+        .filter((post) => post.date_iso)
+        .sort(
+            (a, b) =>
+                b.date_iso.localeCompare(a.date_iso) ||
+                (b.title ?? "").localeCompare(a.title ?? ""),
+        );
+
+    const newest = published[0]?.date_iso;
+
+    const feed = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">',
+        "    <channel>",
+        "        <title>Karthikey Hegde</title>",
+        `        <link>${SITE_URL}/posts</link>`,
+        "        <description>Technical blog posts on distributed systems, databases, and systems programming.</description>",
+        "        <language>en</language>",
+        `        <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml"/>`,
+        ...(newest ? [`        <lastBuildDate>${rfc822(newest)}</lastBuildDate>`] : []),
+        ...published.map(feedItem),
+        "    </channel>",
+        "</rss>",
+        "",
+    ].join("\n");
+
+    const outputFile = path.join(rootDir, "feed.xml");
+    await writeFile(outputFile, feed);
+
+    console.log(`Building RSS feed (${published.length} posts)...`);
+    console.log(`  → ${outputFile}`);
 }
 
 function renderPostLink(href, title) {
@@ -93,6 +170,7 @@ function renderPostList(posts) {
                 `${" ".repeat(16)}<li>`,
                 `${" ".repeat(20)}<span class="date">[ ${date} ] </span>`,
                 renderPostLink(`posts/${post.name}`, title),
+                `${" ".repeat(20)}<span class="views" data-views="list" data-slug="${escapeAttribute(post.name)}" hidden></span>`,
                 `${" ".repeat(16)}</li>`,
             ].join("\n");
         })
@@ -168,6 +246,7 @@ async function main() {
     }
 
     await buildIndex(posts, indexTemplate);
+    await buildFeed(posts);
     await stampStylesheet();
 }
 

@@ -23,12 +23,13 @@
     <meta name="twitter:description" content="Deep dive into SIEVE cache eviction algorithm, comparing it with LRU and exploring its implementation. Understanding modern caching strategies.">
 
     <link rel="canonical" href="https://karthihegde.dev/posts/sieve">
+    <link rel="alternate" type="application/rss+xml" title="Karthikey Hegde" href="/feed.xml">
     <link rel="preconnect" href="https://www.googletagmanager.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Source+Code+Pro:wght@400;800&display=swap">
-    <link rel="stylesheet" href="../styles.css?v=5acb705a41">
+    <link rel="stylesheet" href="../styles.css?v=be80b6da3d">
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-QMCKX3D5N7"></script>
     <script>
@@ -51,6 +52,7 @@
     <div class="blog_title">SIEVE: An Efficient Cache Eviction</div>
     <div style="text-align: center; color: var(--text-secondary); margin-bottom: 30px; font-size: 14px;">
         Published on September 6, 2025
+        <span class="views" data-views="count" data-slug="sieve" hidden></span>
     </div>
     <div class="post-body">
 <p>As we approach the 26th anniversary of the 21st century, hardware continues to get cheaper and more powerful. Data centers now operate with terabytes of RAM, a scale that would have been unimaginable not long ago. Yet, as the old saying goes, Memory is never truly infinite.</p>
@@ -208,5 +210,7 @@ pub fn Cache(comptime K: type, comptime V: type) type {
 </ul>
 
     </div>
+
+    <script src="../js/views.js" defer></script>
 </body>
 </html>
