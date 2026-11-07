@@ -2,6 +2,9 @@
 /**
  * Exercises the view counter through `wrangler dev` (Miniflare), so the
  * Durable Object, its SQLite storage and the throttling are all real.
+ *
+ * The second phase restarts the runtime against the same state directory,
+ * which is what happens when the object hibernates between visits.
  */
 
 import assert from "node:assert/strict";
@@ -14,32 +17,7 @@ const PORT = 8799;
 const BASE = `http://127.0.0.1:${PORT}`;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// A throwaway state directory keeps each run independent of the last one.
 const persistTo = await mkdtemp(path.join(os.tmpdir(), "views-test-"));
-
-const dev = spawn(
-    "npx",
-    [
-        "--yes",
-        "wrangler@latest",
-        "dev",
-        "--port",
-        String(PORT),
-        "--ip",
-        "127.0.0.1",
-        "--persist-to",
-        persistTo,
-    ],
-    { stdio: "ignore", detached: true },
-);
-
-const stop = () => {
-    try {
-        process.kill(-dev.pid, "SIGTERM");
-    } catch {
-        dev.kill("SIGTERM");
-    }
-};
 
 const get = (path, options) =>
     fetch(`${BASE}${path}`, options).then(async (response) => ({
@@ -47,7 +25,23 @@ const get = (path, options) =>
         body: await response.json(),
     }));
 
-try {
+const start = async () => {
+    const dev = spawn(
+        "npx",
+        [
+            "--yes",
+            "wrangler@latest",
+            "dev",
+            "--port",
+            String(PORT),
+            "--ip",
+            "127.0.0.1",
+            "--persist-to",
+            persistTo,
+        ],
+        { stdio: "ignore", detached: true },
+    );
+
     for (let attempt = 0; ; attempt += 1) {
         try {
             await fetch(`${BASE}/views/warmup`);
@@ -58,50 +52,76 @@ try {
         }
     }
 
-    let result = await get("/views/fresh");
-    assert.equal(result.status, 200);
-    assert.deepEqual(result.body, { slug: "fresh", views: 0 });
+    return () => {
+        try {
+            process.kill(-dev.pid, "SIGTERM");
+        } catch {
+            dev.kill("SIGTERM");
+        }
+    };
+};
 
-    result = await get("/views/fresh", { method: "POST" });
-    assert.deepEqual(result.body, { slug: "fresh", views: 1 });
+try {
+    let stop = await start();
 
-    // same IP inside the window is not counted twice
-    result = await get("/views/fresh", { method: "POST" });
-    assert.deepEqual(result.body, { slug: "fresh", views: 1 });
+    try {
+        let result = await get("/views/fresh");
+        assert.equal(result.status, 200);
+        assert.deepEqual(result.body, { slug: "fresh", views: 0 });
 
-    // a different slug from the same IP still counts
-    result = await get("/views/another", { method: "POST" });
-    assert.deepEqual(result.body, { slug: "another", views: 1 });
+        result = await get("/views/fresh", { method: "POST" });
+        assert.deepEqual(result.body, { slug: "fresh", views: 1 });
 
-    result = await get("/views?slugs=fresh,another,missing");
-    assert.deepEqual(result.body, {
-        views: { fresh: 1, another: 1, missing: 0 },
-    });
+        // same IP inside the window is not counted twice
+        result = await get("/views/fresh", { method: "POST" });
+        assert.deepEqual(result.body, { slug: "fresh", views: 1 });
 
-    result = await get("/views/fresh");
-    assert.deepEqual(result.body, { slug: "fresh", views: 1 });
+        // a different slug from the same IP still counts
+        result = await get("/views/another", { method: "POST" });
+        assert.deepEqual(result.body, { slug: "another", views: 1 });
 
-    // rejections
-    result = await get("/views/fresh", {
-        method: "POST",
-        headers: { origin: "https://evil.example" },
-    });
-    assert.equal(result.status, 403);
+        result = await get("/views?slugs=fresh,another,missing");
+        assert.deepEqual(result.body, {
+            views: { fresh: 1, another: 1, missing: 0 },
+        });
 
-    result = await get("/views/Bad%20Slug", { method: "POST" });
-    assert.equal(result.status, 400);
+        // rejections
+        result = await get("/views/fresh", {
+            method: "POST",
+            headers: { origin: "https://evil.example" },
+        });
+        assert.equal(result.status, 403);
 
-    result = await get("/views", { method: "POST" });
-    assert.equal(result.status, 405);
+        result = await get("/views/Bad%20Slug", { method: "POST" });
+        assert.equal(result.status, 400);
 
-    result = await get("/views/fresh", { method: "DELETE" });
-    assert.equal(result.status, 405);
+        result = await get("/views", { method: "POST" });
+        assert.equal(result.status, 405);
 
-    result = await get("/nope");
-    assert.equal(result.status, 404);
+        result = await get("/views/fresh", { method: "DELETE" });
+        assert.equal(result.status, 405);
+
+        result = await get("/nope");
+        assert.equal(result.status, 404);
+    } finally {
+        stop();
+    }
+
+    await sleep(1000);
+    stop = await start();
+
+    try {
+        // after a full restart the count and the 30 minute window both survive
+        let result = await get("/views/fresh", { method: "POST" });
+        assert.deepEqual(result.body, { slug: "fresh", views: 1 });
+
+        result = await get("/views/fresh");
+        assert.deepEqual(result.body, { slug: "fresh", views: 1 });
+    } finally {
+        stop();
+    }
 
     console.log("worker: all assertions passed");
 } finally {
-    stop();
     await rm(persistTo, { recursive: true, force: true });
 }

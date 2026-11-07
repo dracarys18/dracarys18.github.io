@@ -12,6 +12,12 @@ exposed to visitors beyond a number.
 | `GET /views/:slug` | Return `{ slug, views }` without incrementing |
 | `GET /views?slugs=a,b,c` | Return `{ views: { a: 1, b: 0 } }` for up to 50 slugs |
 
+A reader is counted once per article per day: the page records `viewed:<slug>`
+in `localStorage` for 24 hours and only sends the increment once. The server's
+per-IP window is a second line of defence for clients without storage, and it is
+kept in SQLite — the object hibernates between visits on a quiet blog, so an
+in-memory window forgets itself and every reload would count.
+
 Only `karthihegde.dev` and `www.karthihegde.dev` origins are accepted; requests
 carrying another `Origin` get `403`.
 
@@ -29,11 +35,12 @@ and serves reads from memory. Free-plan budget:
 | --- | --- | --- |
 | Worker requests | 100,000/day | ~100k pageviews/day |
 | Durable Object requests | 100,000/day | one per pageview |
-| SQLite rows written | 100,000/day | one per counted view |
+| SQLite rows written | 100,000/day | two per counted view (count + throttle) |
 
-That is ~200× the old ceiling, still $0. Batching the writes behind a timer was
-tried and rejected: a Durable Object that hibernates before its alarm fires loses
-the in-memory delta, which silently dropped counts.
+That is ~50,000 counted views/day, still $0 — and because reloads are deduped in
+the browser, most of them never reach the Worker at all. Batching the writes
+behind a timer was tried and rejected: a Durable Object that hibernates before
+its alarm fires loses the in-memory delta, which silently dropped counts.
 
 ## Setup
 
