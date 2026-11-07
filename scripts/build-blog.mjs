@@ -14,7 +14,9 @@ const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const sourceDir = path.join(rootDir, "posts", "source");
 const templatesDir = path.join(rootDir, "templates");
 
-const STYLESHEET = /((?:\.\.\/)*)styles\.css(?:\?v=[0-9a-f]+)?/g;
+const ASSETS = ["styles.css", "js/views.js", "js/cal-init.js"];
+
+const ASSET = /((?:\.\.\/)*)(styles\.css|js\/[\w.-]+\.js)(?:\?v=[0-9a-f]+)?/g;
 
 const escapeHtml = (value) =>
     String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -202,11 +204,15 @@ async function buildIndex(posts, template) {
     console.log(`  → ${outputFile}`);
 }
 
-async function stampStylesheet() {
-    const hash = createHash("sha256")
-        .update(await readFile(path.join(rootDir, "styles.css")))
-        .digest("hex")
-        .slice(0, 10);
+async function stampAssets() {
+    const hashes = {};
+
+    for (const asset of ASSETS) {
+        hashes[asset] = createHash("sha256")
+            .update(await readFile(path.join(rootDir, asset)))
+            .digest("hex")
+            .slice(0, 10);
+    }
 
     const postsDir = path.join(rootDir, "posts");
     const pages = [
@@ -221,13 +227,15 @@ async function stampStylesheet() {
     for (const page of pages) {
         const source = await readFile(page, "utf8");
         const stamped = source.replace(
-            STYLESHEET,
-            (_match, prefix) => `${prefix}styles.css?v=${hash}`,
+            ASSET,
+            (_match, prefix, asset) => `${prefix}${asset}?v=${hashes[asset]}`,
         );
         if (stamped !== source) await writeFile(page, stamped);
     }
 
-    console.log(`Stamped stylesheet links as styles.css?v=${hash}`);
+    for (const [asset, hash] of Object.entries(hashes)) {
+        console.log(`Stamped ${asset} as ?v=${hash}`);
+    }
 }
 
 async function main() {
@@ -247,7 +255,7 @@ async function main() {
 
     await buildIndex(posts, indexTemplate);
     await buildFeed(posts);
-    await stampStylesheet();
+    await stampAssets();
 }
 
 await main();
