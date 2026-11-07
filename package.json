@@ -5,7 +5,8 @@
     "type": "module",
     "description": "Static site for karthihegde.dev",
     "scripts": {
-        "build": "node scripts/build-blog.mjs"
+        "build": "node scripts/build-blog.mjs",
+        "test": "node scripts/test-views-worker.mjs"
     },
     "dependencies": {
         "satteri": "^0.10.5",

@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+    <channel>
+        <title>Karthikey Hegde</title>
+        <link>https://karthihegde.dev/posts</link>
+        <description>Technical blog posts on distributed systems, databases, and systems programming.</description>
+        <language>en</language>
+        <atom:link href="https://karthihegde.dev/feed.xml" rel="self" type="application/rss+xml"/>
+        <lastBuildDate>Tue, 03 Nov 2026 00:00:00 GMT</lastBuildDate>
+        <item>
+            <title>So my ISP was hijacking my DNS</title>
+            <link>https://karthihegde.dev/posts/dns_tampering</link>
+            <guid isPermaLink="true">https://karthihegde.dev/posts/dns_tampering</guid>
+            <pubDate>Tue, 03 Nov 2026 00:00:00 GMT</pubDate>
+            <category>DNS</category>
+            <category>DoH</category>
+            <category>DoT</category>
+            <category>DNSSEC</category>
+            <category>DNS Tampering</category>
+            <category>ISP Censorship</category>
+            <category>AdGuard</category>
+            <category>dnscrypt-proxy</category>
+            <category>Self-hosting</category>
+            <description>My ISP was tampering with my DNS queries and handing back bogus IP addresses. Here are the misconceptions about DoH, DoT and DNSSEC that followed, and the setup I actually run.</description>
+            <content:encoded><![CDATA[<p>It was just a boring Saturday afternoon, and I thought I'd fix some of the problems with my homelab. One of those problems was that an external site my Podman container was trying to talk to just wasn't working.</p>
+<p>I kept getting "Site cannot be reached" almost immediately. This made me suspect something was wrong with my DNS setup, so I started doing a <code>dig</code> on the domain. I tried different providers, Google DNS, Cloudflare, pretty much everyone. Almost all of them returned the same IP address. But as soon as I tried Cloudflare's DoH endpoint, I got a completely different IP address.</p>
+<p>"Huh?" was my exact reaction.</p>
+<p>I took the IP I got from the first DNS resolution and tried to look up who owned it. Lo and behold, it was my goddamn ISP. That's when I realised my ISP was hijacking my DNS queries and returning a tampered IP address.</p>
+<div class="image-grid">
+  <img src="https://karthihegde.dev/posts/assets/dns/plaintext_dns.png" alt="A plaintext DNS query returning my ISP's IP address" loading="lazy">
+  <img src="https://karthihegde.dev/posts/assets/dns/encrypted_dns.png" alt="The same query over Cloudflare's DoH endpoint returning the real IP address" loading="lazy">
+  <img src="https://karthihegde.dev/posts/assets/dns/ip_info.png" alt="IP ownership lookup showing the tampered address belongs to my ISP" loading="lazy">
+</div>
+<p>Well, the obvious answer was DoT (DNS over TLS) or DoH (DNS over HTTPS). <a href="https://x.com/karthihegde/status/2116533888025874611">I made a tweet about this, and it somehow blew up</a>.</p>
+<p>But going through the replies, I noticed quite a few misconceptions and questions that I couldn't answer one by one.</p>
+<p>So I figured I'd use this article to address some of those questions and clear up a few misconceptions along the way.</p>
+<h2>I self host Unbound I am safe</h2>
+<p>For those of you who don't know, Unbound is basically a DNS resolver, kind of like what Cloudflare runs at <code>1.1.1.1</code>. The difference is, you can run it locally. It works by querying DNS servers to figure out the IP address for a domain, starting at the root nameservers and eventually making its way to the domain's authoritative nameserver.</p>
+<p>Now here's the catch. DNS resolution doesn't happen over a single connection. Your resolver might have to talk to multiple nameservers to figure out an IP address, and these queries are traditionally sent over plaintext DNS, usually UDP. Which means, you guessed it, your ISP can snoop on or even tamper with your DNS traffic.</p>
+<p>But you can also configure a <a href="https://unbound.docs.nlnetlabs.nl/en/latest/manpages/unbound.conf.html#forward-zone-options">forward-zone</a> in Unbound. Instead of resolving DNS queries itself, Unbound can forward them to another DNS resolver. And if that resolver supports DoT, the connection to it is encrypted, which means your ISP can't casually snoop on or tamper with your DNS queries in transit.</p>
+<h2>Just use DNSSEC</h2>
+<p>It's understandable why someone would assume DNSSEC is what protects them here. I mean, it has DNS and Security right in the name. And in a way, it does, but it works through verification, not encryption.</p>
+<p>You see, DNSSEC doesn't encrypt your DNS traffic before sending it to a resolver. It uses cryptographic signatures to verify that the DNS data is authentic and hasn't been tampered with. But the problem here remains the same: your DNS traffic is still unencrypted in transit. Which means, your ISP can still snoop on it or mess with the responses.</p>
+<p>And for DNSSEC validation to work, the domain you're querying needs to have DNSSEC properly configured, with valid signatures and a chain of trust. And here's another problem: <a href="https://defaults.exposed/methodology/dnssec">according to the October 2026 Defaults.Exposed census</a>, only 7.03% of graded domains have a valid, fully validating DNSSEC chain.</p>
+<p>If a tampered response fails DNSSEC validation, your resolver will return SERVFAIL instead of handing you that bogus IP address.</p>
+<h2>DoH and DoT are not Tamper free</h2>
+<p>And yes, this is true. DoT and DoH rely on you trusting the DNS resolver you're sending your queries to. They encrypt the connection, so your ISP can't casually snoop on or tamper with your DNS traffic in transit. But that doesn't mean the resolver itself can't mess with your responses. You're still putting your trust in whoever runs that DNS server.</p>
+<h2>Your ISP can snoop on the sites regardless</h2>
+<p>Indeed. Although your regular internet traffic is encrypted with TLS, your ISP can see the hostname during the TLS handshake (SNI). They can also figure out which site you're visiting just from the destination IP sometimes.</p>
+<p>Unless, of course, you tunnel your traffic through a VPN. I use Mullvad through Tailscale's exit node feature.</p>
+<p>Of course, this just shifts some of the trust to your VPN provider. But that's a story for another day.</p>
+<h2>So what does my setup look like?</h2>
+<p>I've been using Pi-hole/AdGuard for over 3 years now. That's actually what got me into self-hosting in the first place.</p>
+<p>But there's another reason I don't route every single container through my local DNS server. When I'm updating containers, if something goes wrong and my DNS server goes down, I don't want that to take down DNS resolution for other containers that depend on it. So for some containers, I wanted an external DNS resolver as a fallback.</p>
+<p>Right now, I use AdGuard for my DNS, with <code>dnscrypt-proxy</code> handling the upstream DNS queries over DNSCrypt, so my DNS traffic is encrypted in transit. For containers where I really can't afford DNS failures, I also have Cloudflare configured as a fallback. My local AdGuard is still the primary DNS for them, though.</p>
+<p>I also run NixOS on my servers, and my <a href="https://github.com/dracarys18/dotfiles">dotfiles</a> are open source if you're interested</p>
+]]></content:encoded>
+        </item>
+        <item>
+            <title>What 'Mystic River' teaches you about life</title>
+            <link>https://karthihegde.dev/posts/what_mystic_river</link>
+            <guid isPermaLink="true">https://karthihegde.dev/posts/what_mystic_river</guid>
+            <pubDate>Sun, 08 Mar 2026 00:00:00 GMT</pubDate>
+            <category>Mystic River</category>
+            <category>Life</category>
+            <category>Philosophy</category>
+            <category>Butterfly Effect</category>
+            <description>What mystic river teaches you about life</description>
+            <content:encoded><![CDATA[<p><strong>⚠️ WARNING: SPOILERS AHEAD</strong><br>
+<em>The following article contains heavy plot spoilers for the book and movie Mystic River.</em></p>
+<p>—</p>
+<p><strong>Mystic River</strong> is one of the most famous books of the 21st Century. Written by Dennis Lehane (author of <em>Shutter Island</em>), it is one of the best psychological thrillers out there to read. The story follows three complex characters: <strong>Dave Boyle</strong>, a murder suspect; <strong>Jimmy Markum</strong>, the victim’s father; and <strong>Celeste Boyle</strong>, Dave’s wife.
+It all starts with a single, random moment: three boys are standing on a sidewalk when a car pulls up. Dave is abducted by two people posing as cops and held for four days until he finally escapes. This incident breaks Dave for life.
+Years later, Jimmy’s daughter, Katie, is murdered. On that same night, Dave returns home covered in blood with a wound in his stomach. Because Dave was already "broken" by his past, his own wife, Celeste, spends the rest of the book suspecting him. In the end, Jimmy kills Dave for a crime he didn't commit, only to find out Katie’s death was a simple accident with no hidden agenda.</p>
+<figure>
+  <img src="https://karthihegde.dev/posts/assets/daves-abduction.jpg" alt="Dave's abduction" style="width: 80%">
+  <figcaption>Figure 1: Dave's abduction</figcaption>
+</figure>
+<h2>Myth of Purpose</h2>
+<p>We often tell ourselves that we are here for a reason or that our lives have a specific purpose. However, the reality presented in <em>Mystic River</em> is that life is simply a chain of multiple <strong>Butterfly Effects</strong>. The random events that happen to us shape the trajectory of our entire existence. As cruel or sad as it may sound, it is just a fact.</p>
+<p>Dave’s abduction wasn't part of some grand, cosmic plan; it was a random incident. It could have been anyone on that sidewalk, but it happened to be him. That one moment defined his life and how he lived for the next thirty years. Similarly, Katie’s murder wasn't the work of a criminal mastermind or a grand plot; it was a senseless accident.</p>
+<p>The tragedy of the book lies in the characters searching for meaning or purpose:</p>
+<ul>
+<li><strong>Jimmy</strong>: Believes his life's purpose is to avenge his daughter's killer. He ends up killing his childhood friend for a crime he didn't commit.</li>
+<li><strong>Celeste</strong>: The tragedy of Dave Boyle’s death is that it wasn't just a failure of justice; it was a failure of love. While Jimmy pulls the trigger, it is Celeste who truly kills Dave. She allows her fear to override her history with him, convincing herself that her "purpose" is to protect the world from the "monster" she married. By handing Jimmy a story instead of standing by her husband, she turns a random tragedy into a permanent one.</li>
+<li><strong>Dave</strong>: For some people, life isn't about the choices they make, but the random things that happen <em>to</em> them. Dave, fundamentally a good man, was a magnet for the misfortunes that dictated thirty years of his life and, ultimately, his death.</li>
+</ul>
+<figure>
+  <img src="https://karthihegde.dev/posts/assets/ending-mystic-river.png" alt="Jimmy forcing Dave to admit before he kills him" style="width: 80%">
+  <figcaption>Figure 2: Jimmy forcing Dave to admit before he kills him</figcaption>
+</figure>
+<h2>Life moves on</h2>
+<p>In the end, the world moves on. The sun stays up, the music plays, and the river continues to flow. There is no cosmic justice for Dave, and there is no grand epiphany for the survivors.
+The "Butterfly Effect" that began with a car door opening thirty years ago finally reaches its end, leaving behind a wake of broken people while the rest of the world remains indifferent. We want our pain to have a purpose, but often, we are just caught in the current of a river that doesn't care where it is going.</p>
+<h2>References</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Butterfly_effect">Butterfly Effect</a></li>
+</ul>
+]]></content:encoded>
+        </item>
+        <item>
+            <title>HyperLogLog: Counting without Counting</title>
+            <link>https://karthihegde.dev/posts/hyperloglog</link>
+            <guid isPermaLink="true">https://karthihegde.dev/posts/hyperloglog</guid>
+            <pubDate>Wed, 24 Sep 2025 00:00:00 GMT</pubDate>
+            <category>HyperLogLog</category>
+            <category>Probabilistic Algorithms</category>
+            <category>Cardinality Estimation</category>
+            <category>Data Structures</category>
+            <category>Computer Science</category>
+            <description>Deep dive into HyperLogLog, a probabilistic counting algorithm that estimates cardinality with minimal memory. Implementation and mathematical analysis included.</description>
+            <content:encoded><![CDATA[<p>Every time I read about a probabilistic data structure, I'm blown away — like, who even came up with this stuff? (Philippe Flajolet did). Even after I understand how it works, it still feels magical.</p>
+<p>In this blog, I'll explain how it works — with as few Greek letters as possible, So you have your mind blown too :)</p>
+<p>I've implemented the HyperLogLog algorithm in Zig. Check out the repository here: <a href="https://github.com/dracarys18/wood">https://github.com/dracarys18/wood</a></p>
+<h2>Counting Unique Elements</h2>
+<p>Counting unique elements is a memory heavy task, it requires you to remember all the elements that has ever been pushed to the set which could be very high. Hyperloglog on the other hand uses small constant amount of memory to get the unique count.</p>
+<p>With just 16KB of memory it can count the cardinality of billions of items with <strong>error rate below 1%</strong></p>
+<h2>How does it work?</h2>
+<p>Imagine you have a byte. What are the chances that the first bit is zero? It's 50%. What about the first two bits being zero? That's 25%. In general, the probability that the first n bits are zero is:</p>
+<blockquote>
+<p>P(first n bits are zero) = 1/2ⁿ</p>
+</blockquote>
+<p>For example, the probability that the first 10 bits are all zero is 1/1024. This means that, on average, you would need 1,024 numbers to get one where the first 10 bits are zero.</p>
+<p>That's the basic idea of HyperLogLog it estimates the number of unique number in the set by just using the first n leading zeroes of the hashed values</p>
+<p>So why hash the bits why not just count the zeroes in raw bits? Hashing the value gives you random-looking distribution of bits without hashing whereas the raw input values might have patterns or clusters that will bias to the algorithm, making our estimates inaccurate.</p>
+<p>In a large set of numbers, there's a high chance that some values will be unusual or extreme. To reduce the effect of these "freak" values, HyperLogLog divides the numbers into multiple buckets. The more buckets you have, the more accurate the estimate becomes. When initializing HyperLogLog, you provide a precision p, which determines the number of buckets as:</p>
+<blockquote>
+<p>m = 2ᵖ</p>
+</blockquote>
+<p>After using the first p bits to pick a bucket, the remaining bits of the hash are used to count the number of leading zeros. This is the clever part that allows HyperLogLog to estimate the total number of unique items.</p>
+<p>Each bucket keeps track of the largest number of leading zeros it has seen. Later, HyperLogLog combines the information from all buckets to produce a single estimate. By using multiple buckets, the highs and lows from random chance balance out, giving a much more reliable result — all while using very little memory.</p>
+<h2>Count(Main Part)</h2>
+<p>Now that we understand there are m = 2ᵖ buckets and each bucket stores the largest number of leading zeros it has seen, it's time to look at how HyperLogLog uses this information to estimate the total number of unique items.</p>
+<p>HyperLogLog combines the data from all buckets using a simple idea: if some buckets have very high leading-zero counts, it means the dataset is likely large. If most buckets have small counts, the dataset is smaller. By averaging these counts and applying a correction formula, HyperLogLog calculates an estimate of the number of unique elements.</p>
+<p>The formula might look complicated at first, but the intuition is straightforward: each bucket gives a hint about the size of the dataset, and combining all these hints produces a reliable estimate without ever storing all the items.</p>
+<p>The HyperLogLog estimate is given by:</p>
+<blockquote>
+<p>E = αₘ · m² · (Σⱼ₌₁ᵐ 2⁻ᴹ⁽ʲ⁾)⁻¹</p>
+</blockquote>
+<p>Where:</p>
+<ul>
+<li>E = estimated number of unique items</li>
+<li>m = 2ᵖ = number of buckets</li>
+<li>M[j] = largest number of leading zeros observed in bucket j</li>
+<li>αₘ = bias correction constant (depends on m)</li>
+</ul>
+<p>Woah, woah! I promised no Greek letters… I tried, but let me explain.</p>
+<p>Let's focus on the inner part of the formula:</p>
+<blockquote>
+<p>m² · (Σⱼ₌₁ᵐ 2⁻ᴹ⁽ʲ⁾)⁻¹</p>
+</blockquote>
+<p>In this formula, j is the bucket number, and M[j] is the maximum count of leading zeros seen in that bucket. As we saw before, 1/2ᴹ⁽ʲ⁾ roughly estimates how many items ended up in that bucket.</p>
+<p>Up to this point, we've only looked at one bucket's estimate. You might think we could just average all the buckets, but a single very large value can throw off the result. HyperLogLog avoids this by using the <strong>harmonic mean</strong>, which evens out the buckets and keeps the estimate more accurate. Thus the reciprocal on the sum on the formula multiplied by the bucket size. The harmonic mean only tells us the average estimate for a single bucket. To estimate the total number of unique items across all buckets, we multiply it by the total number of buckets.</p>
+<p>Now we have finished explaining the basic estimate, but this number can vary for very small or very large datasets:</p>
+<ul>
+<li><strong>Small range:</strong> When the dataset is small, many buckets are still zero. In this case, the formula tends to underestimate the number of unique items.</li>
+<li><strong>Large range:</strong> When the dataset is very large, the formula can overestimate the count significantly.</li>
+</ul>
+<p>Now this is where the mysterious Greek letter comes in. It's called the <strong>bias correction constant</strong>, and its job is to make the estimate slightly more accurate.</p>
+<p>When Hyperloglog was initially developed the researchers went through a lot of data and checked the ratio between raw estimate and actual count and came up with the bias correction constant</p>
+<p>Here's the formula for bias correction:</p>
+<ul>
+<li>For m = 16: αₘ = 0.673</li>
+<li>For m = 32: αₘ = 0.697</li>
+<li>For m = 64: αₘ = 0.709</li>
+<li>For m ≥ 128:</li>
+</ul>
+<blockquote>
+<p>αₘ = 0.7213 / (1 + 1.079/m)</p>
+</blockquote>
+<p>So why does αₘ change based on the number of buckets? When the number of buckets is small, the estimate tends to have a slightly different bias than when the number of buckets is large. The constant αₘ adjusts for this difference to keep the estimate accurate.</p>
+<h2>Error Rate</h2>
+<p>So after all these calculations, the formula for Hyperloglog standard error rate is:</p>
+<blockquote>
+<p>Standard Error = 1.04 / √m</p>
+</blockquote>
+<p>The smaller the number of buckets, the higher the error will be. Each bucket stores a small number (the maximum number of leading zeros seen), so using fewer buckets means less memory is used but also less information is captured, which increases the error.</p>
+<h2>Conclusion</h2>
+<p>Well, there you have it, a deep dive into probabilistic counting! When I first read the original HyperLogLog paper, it was full of math and symbols, and it took me a while to wrap my head around it. Here, I've tried to make it as simple and readable as possible. I hope you enjoyed it! I didn't include all the code examples because the blog was already long enough, but you can always check out the implementation on my GitHub.</p>
+<h2>References</h2>
+<ul>
+<li>Philippe Flajolet, Éric Fusy, Olivier Gandouet, and Frédéric Meunier. <a href="https://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf">HyperLogLog: The analysis of a near-optimal cardinality estimation algorithm</a></li>
+<li><a href="https://research.google/pubs/pub40671/">Google. "HyperLogLog in Practice", 2013.</a></li>
+<li><a href="https://engineering.fb.com/2018/12/13/data-infrastructure/hyperloglog/">Meta (Facebook). "Presto: Distributed SQL Query Engine" — HyperLogLog implementation.</a></li>
+</ul>
+]]></content:encoded>
+        </item>
+        <item>
+            <title>SIEVE: An Efficient Cache Eviction</title>
+            <link>https://karthihegde.dev/posts/sieve</link>
+            <guid isPermaLink="true">https://karthihegde.dev/posts/sieve</guid>
+            <pubDate>Sat, 06 Sep 2025 00:00:00 GMT</pubDate>
+            <category>SIEVE</category>
+            <category>Cache Eviction</category>
+            <category>LRU</category>
+            <category>Caching Algorithms</category>
+            <category>Computer Science</category>
+            <category>Systems Programming</category>
+            <description>Deep dive into SIEVE cache eviction algorithm, comparing it with LRU and exploring its implementation. Understanding modern caching strategies.</description>
+            <content:encoded><![CDATA[<p>As we approach the 26th anniversary of the 21st century, hardware continues to get cheaper and more powerful. Data centers now operate with terabytes of RAM, a scale that would have been unimaginable not long ago. Yet, as the old saying goes, Memory is never truly infinite.</p>
+<figure>
+  <img src="https://karthihegde.dev/posts/assets/the_cloud.png" alt="The Cloud" style="width: 80%">
+  <figcaption>Figure 1: The Cloud</figcaption>
+</figure>
+<p>Cache eviction algorithms have evolved a lot, and there's no single strategy that fits every need. That's why we've ended up with so many of them.</p>
+<p>I came across the SIEVE eviction policy and wanted to see how it really works. The best way to learn, at least for me, is to try building it myself. So I decided to write a cache with SIEVE eviction, using Zig as my language of choice. Let's see how it goes!</p>
+<pre><code class="language-zig">/// The cache object
+pub fn Cache(comptime K: type, comptime V: type) type {
+    return struct {
+        /// Thread-safe Wrapper over traditional hashmap
+        inner: map.ChashMap(K, *Node(K, V)),
+
+        /// Doubly linkedlist for the eviction
+        expiry: DoubleLinkedList(K, V),
+
+        /// Allocator
+        allocator: std.mem.Allocator,
+
+        /// Eviction policy enum
+        eviction: EvictionPolicy(K, V),
+
+        /// Size of the cache
+        limit: usize,
+
+        /// Optional TTL
+        ttl: ?i64,
+
+        const Self = @This();
+    };
+};
+</code></pre>
+<p>This is our basic cache object. Internally, it uses a doubly linked list to keep track of which element should be evicted next. Alongside that, we maintain a <code>size</code> to enforce capacity limits, and a <code>ttl</code> (time-to-live) attribute so entries can expire automatically after a certain duration.</p>
+<h2>Insert</h2>
+<p>Now with that settled, let's walk through what actually happens when we insert an object into the cache. This is where the behavior of SIEVE starts to look different from the traditional LRU approach. In LRU, every insert pushes the item to the back of the queue so it's treated as the most recently used. SIEVE, on the other hand, takes a lighter path—placing items at the front and marking them with a simple <code>visited</code> flag. This small change is what gives SIEVE its efficiency later when it comes time to evict entries.</p>
+<p>Take a look at the code below, whenever we insert an element into the cache if the element is already found LRU moves it to the back to indicate the object was recently used while SIEVE just marks it as visited. A little tweak but it's gonna come in handy later during eviction</p>
+<pre><code class="language-zig">pub inline fn insert(
+    self: Self,
+    allocator: std.mem.Allocator,
+    node: ?*Node(K, V),
+    queue: *DoubleLinkedList(K, V),
+    key: K,
+    value: V,
+) !?*Node(K, V) {
+    switch (self) {
+        .LeastRecentlyUsed =&gt; {
+            if (node) |nonull_node| {
+                nonull_node.data = value;
+                queue.moveToBack(nonull_node);
+                return null;
+            } else {
+                const new_node = try Node(K, V).init(key, value, allocator);
+                const is_pushed = queue.push_back(new_node);
+
+                if (is_pushed) {
+                    return new_node;
+                } else {
+                    new_node.deinit();
+                    return null;
+                }
+            }
+        },
+        .Sieve =&gt; {
+            if (node) |nonull_node| {
+                nonull_node.data = value;
+                nonull_node.visited = true;
+                return null;
+            } else {
+                const new_node = try Node(K, V).init(key, value, allocator);
+                const is_pushed = queue.push_front(new_node);
+
+                if (is_pushed) {
+                    return new_node;
+                } else {
+                    new_node.deinit();
+                    return null;
+                }
+            }
+        },
+    }
+}
+</code></pre>
+<h2>Lookup</h2>
+<p>Now that we've covered how inserts work, let's move on to lookups—the <code>get</code> operation. After all, the whole point of a cache is to serve as many requests as possible from memory, which means aiming for more cache hits and fewer misses.</p>
+<p>In LRU, every time you fetch an object from the cache, it's moved to the back of the queue and treated as the most recently used. This means that even an occasional access is enough to keep the object from being evicted, as long as other items don't crowd the cache beyond its limit.</p>
+<p>SIEVE takes a different approach. When you fetch an object, it doesn't shuffle the queue like LRU does. Instead, it simply marks the item as <code>visited</code>. This makes the policy more lightweight: items don't get artificially promoted to the "safest" position with every single access, but are still given a chance to survive eviction if they're actually used again. In other words, SIEVE avoids keeping rarely used objects around forever just because they were accessed once.</p>
+<p>The idea of tagging recently accessed items with a simple marker isn't entirely new it comes from the CLOCK eviction policy, which uses reference bits to track whether an item has been accessed recently.</p>
+<pre><code class="language-zig">pub inline fn get(
+    self: Self,
+    node: ?*Node(K, V),
+    queue: *DoubleLinkedList(K, V),
+) ?V {
+    switch (self) {
+        // On every get the node is moved to back in LRU
+        .LeastRecentlyUsed =&gt; {
+            if (node) |nonull_node| {
+                queue.moveToBack(nonull_node);
+                return nonull_node.data;
+            } else {
+                return null;
+            }
+        },
+        // SIEVE does not modify the queue, rather it just marks the node as visited
+        .Sieve =&gt; {
+            if (node) |nonull_node| {
+                nonull_node.set_visited(true);
+                return nonull_node.data;
+            }
+            return null;
+        },
+    }
+}
+</code></pre>
+<h2>Eviction</h2>
+<p>Now that we understand how lookups work, let's move on to eviction. We've already touched on the idea of how items are chosen to be removed, but now it's time to look at the actual mechanics of how eviction is carried out.</p>
+<pre><code class="language-zig"> pub inline fn evict(self: Self, ll: *DoubleLinkedList(K, V)) ?K {
+        switch (self) {
+            .LeastRecentlyUsed =&gt; {
+                if (ll.front) |front| {
+                    return front.key;
+                }
+                return null;
+            },
+
+            .Sieve =&gt; {
+                var hand = ll.cursor orelse ll.back;
+
+                while (hand) |node| : (hand = node.prev orelse ll.back) {
+                    if (!node.visited) {
+                        ll.cursor = node.prev;
+                        return node.key;
+                    }
+                    node.visited = false;
+                }
+                return null;
+            },
+        }
+    }
+</code></pre>
+<p>Eviction is basically the moment when the cache decides who gets to stay and who has to go. In LRU, it's simple — the item that's been ignored the longest (sitting at the front of the queue) gets evicted. SIEVE handles this a little differently. It looks at the item at the front: if it's been marked as <code>visited</code>, the cache clears that mark and gives the item another chance by moving it to the back. If it hasn't been touched in a while, it's shown the door. This way, things you actually use tend to stick around, and the stale stuff slowly makes its way out.</p>
+<figure>
+  <img src="https://karthihegde.dev/posts/assets/sieve_diagram.gif" alt="How does SIEVE work" style="width: 80%">
+  <figcaption>Figure 2: How does SIEVE work (Credits: <a href="https://cachemon.github.io/SIEVE-website/">Cachemon</a>)</figcaption>
+</figure>
+<h2>Takeaways</h2>
+<p>Well that's a wrap! If this stuff got you curious, I'll drop a link to the full repo below. Honestly, the most fun part of writing this wasn't typing out the blog—it was building SIEVE myself and seeing it click. I really believe the best way to learn is by rolling up your sleeves and trying it out. It scratches that curiosity itch in a way just reading never does.</p>
+<p>Oh also I am new to zig so if you are angry at how I wrote the code, I totally understand :p</p>
+<h2>References</h2>
+<ul>
+<li><a href="https://cachemon.github.io/SIEVE-website/">Cachemon</a></li>
+<li><a href="https://junchengyang.com/publication/nsdi24-SIEVE.pdf">SIEVE: CMU Paper (NSDI 2024)</a></li>
+<li><a href="https://github.com/dracarys18/cerca">Cerca Repository (My full implementation)</a></li>
+</ul>
+]]></content:encoded>
+        </item>
+        <item>
+            <title>From Paperweight to Homelab</title>
+            <link>https://karthihegde.dev/posts/from_paperweight_to_homelab</link>
+            <guid isPermaLink="true">https://karthihegde.dev/posts/from_paperweight_to_homelab</guid>
+            <pubDate>Mon, 10 Mar 2025 00:00:00 GMT</pubDate>
+            <category>Homelab</category>
+            <category>Self-hosting</category>
+            <category>Immich</category>
+            <category>Docker</category>
+            <category>Tailscale</category>
+            <category>CGNAT</category>
+            <category>Google Photos Alternative</category>
+            <description>Transforming an old laptop into a self-hosted homelab with Immich, Docker, and Tailscale. A journey from Google Photos frustration to running your own infrastructure.</description>
+            <content:encoded><![CDATA[<p>As I was going through my daily routine, I received that dreaded Google Photos notification: 'Your storage is 70% full. Upgrade your plan for more storage.' The frustration set in immediately—I had just upgraded my plan a week ago! While pondering how I'd already consumed so much space, my gaze drifted to my old laptop gathering dust on the shelf, with its unused 2TB SSD and substantial computing power sitting idle. In that moment, the idea of self-hosting clicked into place like the final piece of a puzzle.</p>
+<figure>
+  <img src="https://karthihegde.dev/posts/assets/vito.png" alt="My old laptop with Vito Corleone" style="width: 80%">
+  <figcaption>Figure 1: My old laptop with Vito Corleone</figcaption>
+</figure>
+<p>Well, whenever I have a problem it's my habit to scour through Reddit for solutions. There I stumbled upon <a href="https://www.reddit.com/r/selfhosted">r/selfhosted</a>. There I found my messiah "Immich". Immich is a self hosted alternative for Google Photos with almost identical features. Immich seemed perfect! Now came the real question that would launch my homelab journey: where do I start?</p>
+<p>While I'd been treating my laptop like a relic, this was not really Intel pentium running dinosaur. This was pretty capable for a homelab.</p>
+<ul>
+<li>Intel i5-8250U</li>
+<li>12 GB RAM</li>
+<li>NVIDIA GeForce MX150</li>
+</ul>
+<p>Like any cultured individual I had USB with Arch Linux ready, So I took my laptop and wiped windows and installed Arch linux</p>
+<p>Now my idea was that I would run immich through docker and expose the port on my router and voila! I have my homelab ready! Well, things weren't that simple let's say.</p>
+<p>Well you see, To address the limitations of IPv4 address exhaustion, ISPs often deploy Carrier-Grade NAT (CGNAT) on their networks. With CGNAT, users are assigned private IP addresses that are not directly accessible from the outside world, effectively sharing a smaller pool of public IP addresses among multiple customers. One potential solution is to rent a publicly accessible static IP address.</p>
+<p>Since my goal wasn't to expose traffic to a large number of users on the internet, but rather to connect just a few of my personal devices, a tunneling solution made more sense.</p>
+<p>I had few options on the tunneling setup, I went with the one which was very easy to setup and manage which is <strong>Tailscale</strong>. Tailscale itself is based of wireguard, has amazing documentation and community which made it a perfect choice for me.</p>
+<p>As of today (the date of this blog), I'm running a few self-hosted services on my old laptop. It's pretty amazing how a device I once considered obsolete has now become a central part of my digital ecosystem.</p>
+<figure>
+  <img src="https://karthihegde.dev/posts/assets/glance.png" alt="Screenshot of my Glance dashboard" style="width: 80%">
+  <figcaption>Figure 2: Screenshot of my Glance dashboard</figcaption>
+</figure>
+<p>What started as frustration with Google Photos storage costs led me down the rabbit hole of self-hosting. I'm still at the surface, excited to see what lies deeper.</p>
+<p>I'll leave some relevant links below for anyone interested in diving deeper into the topics discussed in this blog.</p>
+<ul>
+<li>Homelab configs: <a href="https://github.com/dracarys18/homelab.git">https://github.com/dracarys18/homelab.git</a></li>
+<li>CGNAT: <a href="https://en.wikipedia.org/wiki/Carrier-grade_NAT">https://en.wikipedia.org/wiki/Carrier-grade_NAT</a></li>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc6264">Interesting RFC proposing CGNAT as a temporary solution before the world moves to IPv6</a></li>
+</ul>
+]]></content:encoded>
+        </item>
+    </channel>
+</rss>

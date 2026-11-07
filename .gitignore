@@ -4,6 +4,9 @@ posts/*.html
 # Node
 node_modules/
 
+# Wrangler local state (worker dev/testing)
+.wrangler/
+
 *.pdf
 
 # OS

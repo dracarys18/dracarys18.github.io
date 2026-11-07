@@ -1,0 +1,25 @@
+name = "karthihegde-views"
+main = "worker/index.js"
+compatibility_date = "2026-10-01"
+
+# Top-level keys must come before any [[table]] header in TOML.
+routes = [
+  { pattern = "karthihegde.dev/views*", zone_name = "karthihegde.dev" },
+  { pattern = "www.karthihegde.dev/views*", zone_name = "karthihegde.dev" },
+]
+
+# Counts live in a single SQLite-backed Durable Object: free plan, in-memory
+# counting with batched writes, so traffic is bounded by requests (100k/day)
+# rather than by KV's 1,000 writes/day.
+[[durable_objects.bindings]]
+name = "COUNTER"
+class_name = "ViewCounter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ViewCounter"]
+
+# Only read once, to seed the Durable Object with the numbers the KV counter had.
+[[kv_namespaces]]
+binding = "VIEWS"
+id = "7091545c55ec4ee8b3c411e42d2b42b2"
